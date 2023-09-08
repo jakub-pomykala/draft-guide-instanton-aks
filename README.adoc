@@ -12,7 +12,7 @@
 :page-duration: 45 minutes
 :page-releasedate: 2023-08-31
 :page-description: Learn how to accelerate the startup of your containers using Open Liberty InstantOn and improve the CPU and memory usage using Semeru Cloud Compiler on Azure Kubernetes Services (AKS).
-:page-tags: ['Kubernetes', 'Docker', 'Cloud']
+:page-tags: ['Kubernetes', 'Podman', 'Cloud']
 :page-permalink: /guides/{projectid}
 :page-related-guides: ['kubernetes-intro', `openliberty-operator-intro`, 'cloud-azure']
 :common-includes: https://raw.githubusercontent.com/OpenLiberty/guides-common/prod
@@ -120,15 +120,15 @@ To containize your microservice, use the `kernel-slim-java17-openj9-ubi` Liberty
  
 [role="code_command hotspot file=0",subs="quotes"]
 ----
-#Create the `Dockerfile`.#
-`system/Dockerfile`
+#Create the `Containerfile`.#
+`system/Containerfile`
 ----
 
 // File 0
 Containerfile
 [source, text, linenums, role="code_column"]
 ----
-include::finish/system/Dockerfile[]
+include::finish/system/Containerfile[]
 ----
 
 Starting from the [hotspot=kernel-slim file=0]`kernel-slim-java17-openj9-ubi` Liberty container image, build the container image by copying the local [hotspot=config file=0]`config` directory to the container `config` directory, running the [hotspot=features file=0]`features.sh` script to add the Liberty features that your microservice is required to operate, copying your microservice [hotspot=war file=0]`war` file, and running the [hotspot=configure file=0]`configure.sh` script to get a pre-warmed container image.
@@ -151,7 +151,7 @@ podman build \
 The three `--cap-add` options grant the three Linux capabilities that CRIU requires to perform the application process checkpoint during the container image build. The `--security-opt` option grants access to all Linux system calls to the container image build.
 
 
-For more information to build the InstantOn image by Docker, see the https://openliberty.io/docs/latest/instanton.html#three_step_process[Building the InstantOn image by using the three-step process with Docker or Podman^] documentation.
+For more information to build the InstantOn image by Podman, see the https://openliberty.io/docs/latest/instanton.html#three_step_process[Building the InstantOn image by using the three-step process with Docker or Podman^] documentation.
 
 To verify that the image is built, run the following command to list all local container images:
 
@@ -298,7 +298,7 @@ You will see an output similar to the following:
 
 === Creating a container registry
 
-Your private container registry manages Docker images that you build in later steps. 
+Your private container registry manages Podman images that you build in later steps. 
 With the Azure `az acr` command, create an Azure Container Registry.
 Replace `[registry-name]` with a container registry name that is unique within Azure and
 contains 5-50 alphanumeric characters. You can check whether a registry name already exists by
@@ -346,18 +346,29 @@ which is `[registry-name].azurecr.io`, with all lowercase letters.
 
 === Logging into the container registry
 
-To push Docker images to your registry, you must log in to your Azure Container Registry by using the Azure CLI.
+To push Podman images to your registry, you must log in to your Azure Container Registry by using the Azure CLI.
+
+To login to the registry with Podman instead of Podman there is a few more commands required.
+
+Firstly, login to the regsitry whilst exposing the token which you will set to the `TOKEN` variable
 
 [role=command]
 ```
-az acr login -n [registry-name]
+TOKEN=$(az acr login --name [registry-name] --expose-token --output tsv --query accessToken)
+```
+
+Next, log podman into the registry server by passing through the token variable you have set in the previous step. 
+
+[role=command]
+```
+podman login instanton.azurecr.io --username 00000000-0000-0000-0000-000000000000 --password-stdin <<< $TOKEN
 ```
 
 Once you log in, you will see the following message:
 
 [role="no_copy"]
 ----
-Login Succeeded
+Login Succeeded!
 ----
 
 
@@ -367,12 +378,12 @@ Login Succeeded
 
 == Uploading images to a container registry
 
-=== Building your Docker images
+=== Building your Podman images
 
 The starting Java project, which you can find in the `start` directory, is a multi-module Maven
 project. It is made up of the `system` and `inventory` microservices. Each microservice exists in its own directory,
-`start/system` and `start/inventory`. Both of these directories contain a Dockerfile, which is necessary
-for building the Docker images. If you're unfamiliar with Dockerfiles, check out the
+`start/system` and `start/inventory`. Both of these directories contain a Containerfile, which is necessary
+for building the Podman images. If you're unfamiliar with Containerfile, check out the
 https://openliberty.io/guides/containerize.html[Containerizing microservices^] guide.
 
 Navigate to the `start` directory and run the following command:
@@ -383,25 +394,25 @@ mvn package
 ```
 
 Now that your microservices are packaged, build your 
-Docker images using the `docker build` command. To build your image, you need to have Docker installed 
-and your Docker daemon started.
+Podman images using the `podman build` command. To build your image, you need to have Podman installed 
+and your Podman daemon started.
 
 
 Run the following commands to build and containerize the application:
 
 [role='command']
 ```
-docker build -t system:1.0-SNAPSHOT system/.
+podman build -t system:1.0-SNAPSHOT system/.
 ```
 
-To verify that the images are built, run the `docker images` command to list all local Docker images:
+To verify that the images are built, run the `podman images` command to list all local Podman images:
 
 [role='command']
 ```
-docker images
+podman images
 ```
 
-Your two images `system` and `inventory` should appear in the list of all Docker images:
+Your two images `system` and `inventory` should appear in the list of all Podman images:
 
 [role="no_copy"]
 ----
@@ -421,14 +432,14 @@ The `[registry-server]` looks like `[registry-name].azurecr.io`.
 
 [role=command]
 ```
-docker tag system:1.0-SNAPSHOT [registry-server]/system:1.0-SNAPSHOT
+podman tag system:1.0-SNAPSHOT [registry-server]/system:1.0-SNAPSHOT
 ```
 
 Finally, push your images to the registry:
 
 [role=command]
 ```
-docker push [registry-server]/system:1.0-SNAPSHOT
+podman push [registry-server]/system:1.0-SNAPSHOT
 ```
 
 // =================================================================================================
@@ -506,17 +517,17 @@ View the password for your Azure container registry:
 az acr credential show -n [registry-name] --query "passwords[0].value" -o tsv
 ```
 
-Use the `kubectl create secret docker-registry` command to create a secret to hold your registry credentials. 
+Use the `kubectl create secret podman-registry` command to create a secret to hold your registry credentials. 
 Replace `[password]` with the registry password that you viewed with the 
-`az acr credential show -n [registry-name]` command. The email that is associated with your Docker account replaces `[email-address]`.
+`az acr credential show -n [registry-name]` command. The email that is associated with your Podman account replaces `[email-address]`.
 
 [role=command]
 ```
-kubectl create secret docker-registry guidesecret \
-    --docker-server=[registry-server] \
-    --docker-username=[registry-name] \
-    --docker-password=[password] \
-    --docker-email=[email-address]
+kubectl create secret podman-registry guidesecret \
+    --podman-server=[registry-server] \
+    --podman-username=[registry-name] \
+    --podman-password=[password] \
+    --podman-email=[email-address]
 ```
 The secret is successfully created with the following output:
 
