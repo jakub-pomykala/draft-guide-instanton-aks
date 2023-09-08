@@ -1,47 +1,61 @@
 #!/bin/bash
 set -euxo pipefail
 
-minikube start
-minikube status
-#kubectl cluster-info
-#kubectl get services --all-namespaces
-#kubectl config view
-eval "$(minikube docker-env)"
+# TEST 1:  Running the application in a Docker container
+mvn -ntp -q clean package
 
-# Test app
+docker pull -q icr.io/appcafe/open-liberty:kernel-slim-java11-openj9-ubi
 
+docker build -t openliberty-getting-started:1.0-SNAPSHOT .
+
+docker run -d --name gettingstarted-app -p 9080:9080 openliberty-getting-started:1.0-SNAPSHOT
+
+sleep 60
+
+docker exec gettingstarted-app cat /logs/messages.log | grep product
+docker exec gettingstarted-app cat /logs/messages.log | grep java
+
+status="$(curl --write-out "%{http_code}\n" --silent --output /dev/null "http://localhost:9080/dev/system/properties")" 
+if [ "$status" == "200" ]
+then 
+  echo ENDPOINT OK
+else 
+  echo "$status" 
+  echo ENDPOINT NOT OK
+  exit 1
+fi
+
+docker stop gettingstarted-app && docker rm gettingstarted-app
+
+# TEST 2: Building and running the application
 mvn -ntp -Dhttp.keepAlive=false \
     -Dmaven.wagon.http.pool=false \
     -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 \
-    -q clean package
-
-docker build -t system:1.0-SNAPSHOT system/.
-docker build -t inventory:1.0-SNAPSHOT inventory/.
-
-sed -i 's/\[inventory-repository-uri\]/inventory/g' kubernetes.yaml
-sed -i 's/\[system-repository-uri\]/system/g' kubernetes.yaml
-
-kubectl apply -f kubernetes.yaml
-
-sleep 120
-
-kubectl get pods
-
-minikube ip
-
-curl "http://$(minikube ip):31000/system/properties"
-curl "http://$(minikube ip):32000/api/inventory/systems/system-service"
-
-mvn -ntp failsafe:integration-test "-Dcluster.ip=$(minikube ip)"
+    -q clean package liberty:create liberty:install-feature liberty:deploy
+mvn -ntp liberty:start
+mvn -ntp -Dhttp.keepAlive=false \
+    -Dmaven.wagon.http.pool=false \
+    -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 \
+    -Dcontext.root=/dev/ failsafe:integration-test liberty:stop
 mvn -ntp failsafe:verify
 
-kubectl logs "$(kubectl get pods -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}' | grep system)"
-kubectl logs "$(kubectl get pods -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}' | grep inventory)"
-
-kubectl delete -f kubernetes.yaml
-
-eval "$(minikube docker-env -u)"
-minikube stop
-
-# Clear .m2 cache
-rm -rf ~/.m2
+# TEST 3: packaging and running the application jar
+mvn -ntp liberty:package -Dinclude=runnable
+if [ ! -f "target/guide-getting-started.jar" ]; then
+    echo "target/guide-getting-started.jar was not generated!"
+    exit 1
+fi
+java -jar target/guide-getting-started.jar &
+GGS_PID=$!
+echo "GGS_PID=$GGS_PID"
+sleep 60
+status="$(curl --write-out "%{http_code}\n" --silent --output /dev/null "http://localhost:9080/dev/system/properties")"
+kill $GGS_PID
+if [ "$status" == "200" ]
+then
+  echo ENDPOINT OK
+else
+  echo "$status"
+  echo ENDPOINT NOT OK
+  exit 1
+fi
