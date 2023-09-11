@@ -1,0 +1,24 @@
+apiVersion: apps.openliberty.io/v1
+kind: OpenLibertyApplication
+metadata:
+  name: system
+spec:
+  applicationImage: [registry-server]/system:1.0-SNAPSHOT
+  pullPolicy: Always
+  manageTLS: false
+  expose: true
+  pullSecret: guidesecret
+  pullSecret: guidesecret
+  securityContext:
+    runAsNonRoot: true
+    privileged: false
+    allowPrivilegeEscalation: true
+    capabilities:
+      add:
+      - CHECKPOINT_RESTORE
+      - SETPCAP
+      drop:
+      - ALL
+  semeruCloudCompiler:
+    enable: true
+    replicas: 3

@@ -361,7 +361,7 @@ Next, log podman into the registry server by passing through the token variable 
 
 [role=command]
 ```
-podman login instanton.azurecr.io --username 00000000-0000-0000-0000-000000000000 --password-stdin <<< $TOKEN
+podman login [registry-name.azurecr.io] --username 00000000-0000-0000-0000-000000000000 --password-stdin <<< $TOKEN
 ```
 
 Once you log in, you will see the following message:
@@ -402,7 +402,7 @@ Run the following commands to build and containerize the application:
 
 [role='command']
 ```
-podman build -t system:1.0-SNAPSHOT system/.
+podman build -t system:1.0-SNAPSHOT .
 ```
 
 To verify that the images are built, run the `podman images` command to list all local Podman images:
@@ -686,36 +686,13 @@ kubectl get pods
 If all the pods are healthy and running, you see an output similar to the following:
 [role="no_copy"]
 ----
-NAME                                    READY     STATUS    RESTARTS   AGE
-system-deployment-6bd97d9bf6-4ccds      1/1       Running   0          15s
+NAME                                        READY   STATUS    RESTARTS   AGE
+olo-controller-manager-b99549758-2ndw9      1/1     Running   0          65s
+system-6c594b4fb-jvzsc                      1/1     Running   0          20s
+system-semeru-compiler-1-64c696b88b-l5kqq   1/1     Running   0          41s
+system-semeru-compiler-1-64c696b88b-rlgkt   1/1     Running   0          41s
+system-semeru-compiler-1-64c696b88b-wnnnz   1/1     Running   0          41s
 ----
-
-=== Pushing the image to a container registry
-
-Pushing the image to a registry allows the cluster to create pods by using your container image. The registry that you are using is called Azure Container Registry.
-
-Since you have already set up the Container Registry in the steps above now you just have to use podman to tag your image and push it to the Container Registry.
-
-
-// Tagging images
-Next, you need to tag your container image with the relevant data about your registry:
-
-[role=command]
-```
-podman tag dev.local/system:1.0-SNAPSHOT [system-repository-uri]:1.0-SNAPSHOT
-```
-
-// Pushing images
-Finally, push your image to the registry:
-
-[role=command]
-```
-podman push [system-repository-uri]:1.0-SNAPSHOT
-```
-
-// =================================================================================================
-// Deploying the image
-// =================================================================================================
 
 === Deploying the image
 
@@ -746,6 +723,8 @@ TODO: need a paragraph to describe [hotspot=semeruCloudCompiler file=0]`semeruCl
 To configure the Semeru Cloud Compiler to handle Just-In-time (JIT) compilation requests from the application you have to set it's [hotspot=enable file=0]`enable` parameter to `true` and also specify the amount of replices you would like.
 You are not required to specify the amount of replices as the default is `1`. Another parameter that you can specify is the `resource`; this is the resource requests and limits for the Semeru Cloud Compiler. The CPU deafults to `100m` with a limit of `2000m`.
 The memory defaults to `800Mi`, with a limit of `1200Mi`. To find out more you can visit link:https://github.com/OpenLiberty/open-liberty-operator/blob/main/doc/user-guide-v1.adoc[Open Liberty Operator v1.2.0+ documentation].
+
+Since you have already pushed your image to the container registry in the previous steps you are now able to go ahead deploy it.
 
 
 Run the following command to deploy the `system` InstantOn image:
