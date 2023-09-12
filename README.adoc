@@ -674,7 +674,7 @@ You will see an output similar to the following:
 
 [role="no_copy"]
 ----
-deployment.apps/system-deployment created
+openlibertyapplication.apps.openliberty.io/system created
 ----
 
 Run the following command to check the status of your pods:
@@ -718,14 +718,13 @@ The [hotspot=sysImage file=0]`applicationImage` parameter defines what container
 
 In [hotspot=securityContext file=0]`securityContext` configuration, the [hotspot=runAsNonRoot file=0]`runAsNonRoot` cofiguration specifies that for any configuration in the pod, all processes run with a non-root user ID. With the [hotspot=capabilities file=0]`capabailities` configuration, we are only adding the the  `CHECKPOINT_RESTORE` and `SETCAP` capabilities for our InstantOn image and dropping all the remaining capabilities by specifying [hotspot=ALL file=0]`ALL` in the `capabilities.drop`. 
 
-TODO: need a paragraph to describe [hotspot=semeruCloudCompiler file=0]`semeruCloudCompiler` configuration.
+emeru Cloud Comiler server instance provides real-time code compiling as a process, independent of the application.
+
+Set [hotspot=enable file=0]`enable` parameter to `true` in the [hotspot=semeruCloudCompiler file=0]`semeruCloudCompiler` configuration to grant application access to the Semeru Cloud Compiler server instance .
 
 To configure the Semeru Cloud Compiler to handle Just-In-time (JIT) compilation requests from the application you have to set it's [hotspot=enable file=0]`enable` parameter to `true` and also specify the amount of replices you would like.
 You are not required to specify the amount of replices as the default is `1`. Another parameter that you can specify is the `resource`; this is the resource requests and limits for the Semeru Cloud Compiler. The CPU deafults to `100m` with a limit of `2000m`.
 The memory defaults to `800Mi`, with a limit of `1200Mi`. To find out more you can visit link:https://github.com/OpenLiberty/open-liberty-operator/blob/main/doc/user-guide-v1.adoc[Open Liberty Operator v1.2.0+ documentation].
-
-Since you have already pushed your image to the container registry in the previous steps you are now able to go ahead deploy it.
-
 
 Run the following command to deploy the `system` InstantOn image:
 [role=command]

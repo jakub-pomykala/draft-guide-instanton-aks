@@ -1,14 +1,20 @@
+# tag::system[]
 apiVersion: apps.openliberty.io/v1
+# tag::olapp[]
 kind: OpenLibertyApplication
+# end::olapp[]
 metadata:
   name: system
 spec:
+  # tag::sysImage[]
   applicationImage: [registry-server]/system:1.0-SNAPSHOT
+  # end::sysImage[]
   pullPolicy: Always
   manageTLS: false
   expose: true
   pullSecret: guidesecret
   pullSecret: guidesecret
+  # tag::securityContext[]
   securityContext:
     runAsNonRoot: true
     privileged: false
@@ -19,6 +25,9 @@ spec:
       - SETPCAP
       drop:
       - ALL
+  # end::securityContext[]
+  # tag::semeruCloudCompiler[]
   semeruCloudCompiler:
     enable: true
     replicas: 3
+  # end::semeruCloudCompiler[]

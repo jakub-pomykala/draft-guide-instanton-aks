@@ -1,4 +1,6 @@
+# tag::kernel-slim[]
 FROM icr.io/appcafe/open-liberty:kernel-slim-java17-openj9-ubi
+# end::kernel-slim[]
 
 ARG VERSION=1.0
 ARG REVISION=SNAPSHOT
@@ -15,8 +17,19 @@ LABEL \
   summary="The system microservice from the Getting Started guide" \
   description="This image contains the system microservice running with the Open Liberty runtime."
 
+# tag::config[]
 COPY --chown=1001:0 src/main/liberty/config/ /config/
-COPY --chown=1001:0 target/*.war /config/apps/
-
+# end::config[]
+# tag::features[]
+RUN features.sh
+# end::features[]
+# tag::war[]
+COPY --chown=1001:0 target/guide-instanton-aks.war /config/apps
+# end::war[]
+# tag::configure[]
 RUN configure.sh
+# end::configure[]
+
+# tag::checkpoint[]
 RUN checkpoint.sh afterAppStart
+# end::checkpoint[]
