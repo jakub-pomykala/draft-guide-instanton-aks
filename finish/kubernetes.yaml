@@ -4,30 +4,58 @@ apiVersion: apps.openliberty.io/v1
 kind: OpenLibertyApplication
 # end::olapp[]
 metadata:
-  name: system
+  name: system-deployment
+  labels:
+    app: system
 spec:
-  # tag::sysImage[]
-  applicationImage: [registry-server]/system:1.0-SNAPSHOT
-  # end::sysImage[]
-  pullPolicy: Always
-  manageTLS: false
-  expose: true
-  pullSecret: guidesecret
-  pullSecret: guidesecret
-  # tag::securityContext[]
-  securityContext:
-    runAsNonRoot: true
-    privileged: false
-    allowPrivilegeEscalation: true
-    capabilities:
-      add:
-      - CHECKPOINT_RESTORE
-      - SETPCAP
-      drop:
-      - ALL
-  # end::securityContext[]
-  # tag::semeruCloudCompiler[]
-  semeruCloudCompiler:
-    enable: true
-    replicas: 3
-  # end::semeruCloudCompiler[]
+  selector:
+    matchLabels:
+      app: system
+  template:
+    metadata:
+      labels:
+        app: system
+    spec:
+      containers:
+      - name: system-container
+        # tag::sysImage[]
+        image: [registry-server]/system:1.0-SNAPSHOT
+        # end::sysImage[]
+        ports:
+        - containerPort: 9080
+      # tag::sysSecret[]
+      imagePullSecrets:
+      - name: guidesecret
+      # end::sysSecret[]
+      # tag::securityContext[]
+      securityContext:
+        runAsNonRoot: true
+        privileged: false
+        allowPrivilegeEscalation: true
+        capabilities:
+          add:
+          - CHECKPOINT_RESTORE
+          - SETPCAP
+          drop:
+          - ALL
+      # end::securityContext[]
+      # tag::semeruCloudCompiler[]
+      semeruCloudCompiler:
+        enable: true
+        replicas: 3
+      # end::semeruCloudCompiler[]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: system-service
+spec:
+  # tag::sysLoadBalancer[]
+  type: LoadBalancer
+  # end::sysLoadBalancer[]
+  selector:
+    app: system
+  ports:
+  - protocol: TCP
+    port: 9080
+    targetPort: 9080
