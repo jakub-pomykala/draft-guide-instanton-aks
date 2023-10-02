@@ -74,8 +74,10 @@ Before you begin, the following additional tools need to be installed on your Li
 
 * *libseccomp-dev:* You need ot intall `libseccomp-dev` to enable the instalation of `runc`. `libseccomp` is required to enable seccomp support.
 
++
 You can install it using the following command:
 
++
 [role=command]
 ```
 sudo apt-get install libseccomp-dev
@@ -299,11 +301,24 @@ Containerfile
 include::finish/system/Containerfile[]
 ----
 
+[role="code_command hotspot file=0",subs="quotes"]
+----
+#Create the `Containerfile`.#
+`inventory/Containerfile`
+----
+
+// File 1
+Containerfile
+[source, text, linenums, role="code_column"]
+----
+include::finish/inventory/Containerfile[]
+----
+
 Starting from the [hotspot=kernel-slim file=0]`kernel-slim-java17-openj9-ubi` Liberty container image, build the container image by copying the local [hotspot=config file=0]`config` directory to the container `config` directory, running the [hotspot=features file=0]`features.sh` script to add the Liberty features that your microservice is required to operate, copying your microservice [hotspot=war file=0]`war` file, and running the [hotspot=configure file=0]`configure.sh` script to get a pre-warmed container image.
 
 Finally, run the [hotspot=checkpoint file=0]`checkpoint.sh` script to make a checkpoint. The execution of the `checkpoint.sh` must be the last instruction during your container image build. This configuration performs the application process checkpoint and stores the process data as the last layer of the application container image. In this guide, use the `afterAppStart` checkpoint option. For more information about the checkpoint options, see the https://openliberty.io/docs/latest/instanton.html#beforeAppStart[Faster startup with InstantOn^] documentation.
 
-Use the following command to build the InstantOn container image. To grant the necessary Linux capabilities to the container image build, this command must be run either as the `root` user or by using the `sudo` utility.
+Use the following command to build the system InstantOn container image. To grant the necessary Linux capabilities to the container image build, this command must be run either as the `root` user or by using the `sudo` utility.
 
 [role=command]
 ----
@@ -314,6 +329,19 @@ podman build \
    --cap-add=SETPCAP \
    --security-opt seccomp=unconfined \
    system/.
+----
+
+Next use the following command to build the inventory InstantOn container image.
+
+[role=command]
+----
+podman build \
+   -t dev.local/system:1.0-SNAPSHOT \
+   --cap-add=CHECKPOINT_RESTORE \
+   --cap-add=SYS_PTRACE \
+   --cap-add=SETPCAP \
+   --security-opt seccomp=unconfined \
+   inventory/.
 ----
 
 The three `--cap-add` options grant the three Linux capabilities that CRIU requires to perform the application process checkpoint during the container image build. The `--security-opt` option grants access to all Linux system calls to the container image build.
@@ -328,18 +356,19 @@ To verify that the image is built, run the following command to list all local c
 podman images
 ```
 
-Verify that the `system:1.0-SNAPSHOT` image is listed among them, for example:
+Verify that the both `inventory` and `system` images are listed amongst them, for example:
 
 [source, role="no_copy"]
 ----
 REPOSITORY                        TAG
 dev.local/system                  1.0-SNAPSHOT
+dev.local/inventory               1.0-SNAPSHOT
 icr.io/appcafe/open-liberty       kernel-slim-java17-openj9-ubi       
 ----
 
 If you don't see the `system:1.0-SNAPSHOT` image, then check the Maven build log for any potential errors.
 
-Now, you can run your InstantOn container image locally by the following command:
+Now, you can run your `system` InstantOn container image locally using the following command:
 
 [role=command]
 ----
@@ -350,6 +379,19 @@ podman run \
   --security-opt seccomp=unconfined \
   -p 9080:9080 \
   system:1.0-SNAPSHOT
+----
+
+Next, open a new terminal window and use the following command to run your `inventory` InstantOn container image locally:
+
+[role=command]
+----
+podman run \
+  --rm \
+  --cap-add=CHECKPOINT_RESTORE \
+  --cap-add=SETPCAP \
+  --security-opt seccomp=unconfined \
+  -p 9080:9080 \
+  inventory:1.0-SNAPSHOT
 ----
 
 The `--cap-add` option grants the `CHECKPOINT_RESTORE` and `SETPCAP` capabilities. The `SYS_PTRACE` capability is not required to run the InstantOn container image.
@@ -372,7 +414,6 @@ If you'd like like to compare startup times with and withot InstantOn you can do
 == Creating a Kubernetes cluster on AKS
 
 Before you can deploy your microservice, you must create a Kubernetes cluster.
-
 
 // =================================================================================================
 // Provisiong a cluster
@@ -457,11 +498,11 @@ Replace `[password]` with the registry password that you viewed with the
 
 [role=command]
 ```
-kubectl create secret podman-registry guidesecret \
-    --podman-server=[registry-server] \
-    --podman-username=[registry-name] \
-    --podman-password=[password] \
-    --podman-email=[email-address]
+kubectl create secret docker-registry guidesecret \
+    --docker-server=[registry-server] \
+    --docker-username=[registry-name] \
+    --docker-password=[password] \
+    --docker-email=[email-address]
 ```
 The secret is successfully created with the following output:
 
@@ -624,8 +665,6 @@ This means you can access these services from IP addresses that forward incoming
 You can expose your services in other ways such as using a `NodePort` service type. 
 
 The service that is used to expose your deployments is [hotsport=createKnative] `KNative`. This means that you can access theese services from the [hotspot=exposed] `exposed` KNative endpoint. 
-
-You 
 
 // =================================================================================================
 // Deploying your application
