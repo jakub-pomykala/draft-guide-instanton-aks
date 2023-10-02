@@ -83,13 +83,35 @@ sudo apt-get install libseccomp-dev
 
 * *runc:* Runc is a CLI tool for spawning and running containers on Linux according to the OCI specification. Find out more information and installation instructions: https://github.com/opencontainers/runc[opencontainers/runc Github repository^]
 
-* *Azure CLI :* The Azure CLI is a cross-platform command line tool that allows you to connect to Azure and execute commands on Azure resources. See the offical https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt[Install the Azure CLI on Linux^] documentation for information about downloading andsetting up `Azure CLI` on your Linux platform.
+* *Azure Subscription:* To run this guide, you will need an Azure subscription. Navigate to the 
+https://azure.microsoft.com/en-us/pricing/purchase-options/pay-as-you-go/[Microsoft Azure Purchase Options^] 
+to create an account with your email and start a Pay-As-You-Go subscription. 
 
-* *Azure Azure Kubernenetes Services:* Azure Azure Kubernenetes Services (AZ AKS) is used to manage Azure Kubernetes Services. You can install this by running:
+* *Azure CLI:* You will need to use the Azure Command Line Interface (CLI). See the official
+https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest[Install the Azure CLI^]
+documentation for information about setting up the Azure CLI for your platform. 
+To verify that the Azure CLI is installed correctly, run the following command:
 
++
+[role=command]
+```
+az --version
+```
+
+* *kubectl:* You need the Kubernetes command-line tool `kubectl` to interact with your Kubernetes cluster.
+If you do not have `kubectl` installed already, use the Azure CLI to download and install `kubectl` with the following command:
+
++
 [role=command]
 ```
 az aks install-cli
+```
+
+To begin this guide, make sure that you are logged in to Azure to get access to your subscription:
+
+[role=command]
+```
+az login
 ```
 
 // =================================================================================================
@@ -100,6 +122,152 @@ az aks install-cli
 include::{common-includes}/gitclone.adoc[]
 
 // no "try what you'll build" section in this guide because it would be too long due to all setup the user will have to do.
+
+=== Creating a resource group
+
+
+A resource group is an Azure construct to manage a logical collection of resources for your cloud deployments on Azure. 
+You must create a new resource group to manage the resources you need for your Kubernetes deployment.
+
+To create a resource group, an Azure location must be specified. The metadata for your resources are stored at this specified Azure location. 
+If resources are created later without specifying a location, these new resources run in the
+same region that you specified for creating a resource group. 
+
+See the list of available Azure regions for your Azure subscription:
+
+[role=command]
+```
+az account list-locations -o table
+```
+
+You will see an output similar to the following:
+
+[role="no_copy"]
+----
+DisplayName          Latitude    Longitude    Name
+-------------------  ----------  -----------  ------------------
+Central US           41.5908     -93.6208     centralus
+East US              37.3719     -79.8164     eastus
+East US 2            36.6681     -78.3889     eastus2
+West US              37.783      -122.417     westus
+North Central US     41.8819     -87.6278     northcentralus
+South Central US     29.4167     -98.5        southcentralus
+Canada Central       43.653      -79.383      canadacentral
+Canada East          46.817      -71.217      canadaeast
+UK South             50.941      -0.799       uksouth
+UK West              53.427      -3.084       ukwest
+West Central US      40.890      -110.234     westcentralus
+West US 2            47.233      -119.852     westus2
+----
+
+The `name` column specifies the region name that you use to create your resource group.
+
+However, AKS is not available in all regions. Make sure that the region you select is 
+https://azure.microsoft.com/en-us/global-infrastructure/services/?products=kubernetes-service[compatible with AKS^].
+
+Create a resource group using the `az group create` command. Remember to replace `[location]` with a region 
+that is available for your subscription and compatible with AKS.
+
+[role=command]
+```
+az group create -l [location] -n guideGroup
+```
+
+You will see an output similar to the following:
+
+[role="no_copy"]
+```
+{
+  "id": "/subscriptions/[subscription-id]/resourceGroups/guideGroup",
+  "location": "[location]",
+  "managedBy": null,
+  "name": "guideGroup",
+  "properties": {
+    "provisioningState": "Succeeded"
+  },
+  "tags": null,
+  "type": null
+}
+```
+
+=== Creating a container registry
+
+Your private container registry manages Docker images that you build in later steps. 
+With the Azure `az acr` command, create an Azure Container Registry.
+Replace `[registry-name]` with a container registry name that is unique within Azure and
+contains 5-50 alphanumeric characters. You can check whether a registry name already exists by
+using the `az acr check-name -n [registry-name]` command.
+
+[role=command]
+```
+az acr create -g guideGroup -n [registry-name] --sku Basic --admin-enabled
+```
+
+In the `az acr create` command, the `-g` option specifies the resource group to designate to the container registry. 
+You created this resource group before as `guideGroup`. The `-n` option specifies the name of the
+container registry to be created, which is defined as `[registry-name]`. The `--admin-enabled` flag indicates that the admin user is enabled. 
+
+The possible Stock Keeping Unit (SKU) values that can be passed into the `--sku` option are `Basic`, `Standard`, and `Premium`.
+These different SKU options provide pricing for various levels of capacity and usage. You use a Basic SKU because it is cheaper 
+and the services you deploy have low storage and throughput requirements.
+
+You will see an output similar to the following:
+
+[role="no_copy"]
+```
+{
+  "adminUserEnabled": true,
+  "creationDate": "2019-06-05T20:28:09.637994+00:00",
+  "id": "/subscriptions/[subscription-id]/resourceGroups/guideGroup/providers/Microsoft.ContainerRegistry/registries/[registry-name]",
+  "location": "[location]",
+  "loginServer": "[registry-name].azurecr.io",
+  "name": "[registry-name]",
+  "networkRuleSet": null,
+  "provisioningState": "Succeeded",
+  "resourceGroup": "guideGroup",
+  "sku": {
+    "name": "Basic",
+    "tier": "Basic"
+  },
+  "status": null,
+  "storageAccount": null,
+  "tags": {},
+  "type": "Microsoft.ContainerRegistry/registries"
+}
+```
+In the output, the value for `loginServer` is the server name for your container registry,
+which is `[registry-name].azurecr.io`, with all lowercase letters.
+
+=== Logging into the container registry
+
+To push Podman images to your registry, you must log in to your Azure Container Registry by using the Azure CLI.
+
+To login to the registry with Podman instead of Podman there is a few more commands required.
+
+Firstly, login to the regsitry whilst exposing the token which you will set to the `TOKEN` variable
+
+[role=command]
+```
+TOKEN=$(az acr login --name [registry-name] --expose-token --output tsv --query accessToken)
+```
+
+Next, log podman into the registry server by passing through the token variable you have set in the previous step.
+
+[role=command]
+```
+podman login [registry-name.azurecr.io] --username 00000000-0000-0000-0000-000000000000 --password-stdin <<< $TOKEN
+```
+
+Once you log in, you will see the following message:
+
+[role="no_copy"]
+----
+Login Succeeded
+----
+
+// =================================================================================================
+// Building your InstantOn image
+// =================================================================================================
 
 == Building your InstantOn image 
 
@@ -205,248 +373,10 @@ If you'd like like to compare startup times with and withot InstantOn you can do
 
 Before you can deploy your microservice, you must create a Kubernetes cluster.
 
-// =================================================================================================
-// Configuring the Azure CLI
-// =================================================================================================
-=== Configuring the Azure CLI
-
-Before you configure the Azure CLI, you need to be logged in to get access to your subscription.
-
-[role=command]
-```
-az login
-```
-
-// no "try what you'll build" section in this guide because it would be too long due to all setup the user will have to do.
 
 // =================================================================================================
-// Managing an Azure Container Registry
+// Provisiong a cluster
 // =================================================================================================
-
-== Managing an Azure Container Registry
-
-To deploy your microservices, you need to create an Azure Container Registry in the same location 
-where your services are deployed, and link the registry to a resource group. Your registry will manage container instances 
-that will be deployed to a Kubernetes cluster.
-
-=== Creating a resource group
-
-
-A resource group is an Azure construct to manage a logical collection of resources for your cloud deployments on Azure. 
-You must create a new resource group to manage the resources you need for your Kubernetes deployment.
-
-To create a resource group, an Azure location must be specified. The metadata for your resources are stored at this specified Azure location. 
-If resources are created later without specifying a location, these new resources run in the
-same region that you specified for creating a resource group. 
-
-See the list of available Azure regions for your Azure subscription:
-
-[role=command]
-```
-az account list-locations -o table
-```
-
-You will see an output similar to the following:
-
-[role="no_copy"]
-----
-DisplayName          Latitude    Longitude    Name
--------------------  ----------  -----------  ------------------
-Central US           41.5908     -93.6208     centralus
-East US              37.3719     -79.8164     eastus
-East US 2            36.6681     -78.3889     eastus2
-West US              37.783      -122.417     westus
-North Central US     41.8819     -87.6278     northcentralus
-South Central US     29.4167     -98.5        southcentralus
-Canada Central       43.653      -79.383      canadacentral
-Canada East          46.817      -71.217      canadaeast
-UK South             50.941      -0.799       uksouth
-UK West              53.427      -3.084       ukwest
-West Central US      40.890      -110.234     westcentralus
-West US 2            47.233      -119.852     westus2
-----
-
-The `name` column specifies the region name that you use to create your resource group.
-
-However, AKS is not available in all regions. Make sure that the region you select is 
-https://azure.microsoft.com/en-us/global-infrastructure/services/?products=kubernetes-service[compatible with AKS^].
-
-Create a resource group using the `az group create` command. Remember to replace `[location]` with a region 
-that is available for your subscription and compatible with AKS.
-
-[role=command]
-```
-az group create -l [location] -n guideGroup
-```
-
-You will see an output similar to the following:
-
-[role="no_copy"]
-```
-{
-  "id": "/subscriptions/[subscription-id]/resourceGroups/guideGroup",
-  "location": "[location]",
-  "managedBy": null,
-  "name": "guideGroup",
-  "properties": {
-    "provisioningState": "Succeeded"
-  },
-  "tags": null,
-  "type": null
-}
-```
-
-=== Creating a container registry
-
-Your private container registry manages Podman images that you build in later steps. 
-With the Azure `az acr` command, create an Azure Container Registry.
-Replace `[registry-name]` with a container registry name that is unique within Azure and
-contains 5-50 alphanumeric characters. You can check whether a registry name already exists by
-using the `az acr check-name -n [registry-name]` command.
-
-[role=command]
-```
-az acr create -g guideGroup -n [registry-name] --sku Basic --admin-enabled
-```
-
-In the `az acr create` command, the `-g` option specifies the resource group to designate to the container registry. 
-You created this resource group before as `guideGroup`. The `-n` option specifies the name of the
-container registry to be created, which is defined as `[registry-name]`. The `--admin-enabled` flag indicates that the admin user is enabled. 
-
-The possible Stock Keeping Unit (SKU) values that can be passed into the `--sku` option are `Basic`, `Standard`, and `Premium`.
-These different SKU options provide pricing for various levels of capacity and usage. You use a Basic SKU because it is cheaper 
-and the services you deploy have low storage and throughput requirements.
-
-You will see an output similar to the following:
-
-[role="no_copy"]
-```
-{
-  "adminUserEnabled": true,
-  "creationDate": "2019-06-05T20:28:09.637994+00:00",
-  "id": "/subscriptions/[subscription-id]/resourceGroups/guideGroup/providers/Microsoft.ContainerRegistry/registries/[registry-name]",
-  "location": "[location]",
-  "loginServer": "[registry-name].azurecr.io",
-  "name": "[registry-name]",
-  "networkRuleSet": null,
-  "provisioningState": "Succeeded",
-  "resourceGroup": "guideGroup",
-  "sku": {
-    "name": "Basic",
-    "tier": "Basic"
-  },
-  "status": null,
-  "storageAccount": null,
-  "tags": {},
-  "type": "Microsoft.ContainerRegistry/registries"
-}
-```
-In the output, the value for `loginServer` is the server name for your container registry,
-which is `[registry-name].azurecr.io`, with all lowercase letters.
-
-=== Logging into the container registry
-
-To push Podman images to your registry, you must log in to your Azure Container Registry by using the Azure CLI.
-
-To login to the registry with Podman instead of Podman there is a few more commands required.
-
-Firstly, login to the regsitry whilst exposing the token which you will set to the `TOKEN` variable
-
-[role=command]
-```
-TOKEN=$(az acr login --name [registry-name] --expose-token --output tsv --query accessToken)
-```
-
-Next, log podman into the registry server by passing through the token variable you have set in the previous step. 
-
-[role=command]
-```
-podman login [registry-name.azurecr.io] --username 00000000-0000-0000-0000-000000000000 --password-stdin <<< $TOKEN
-```
-
-Once you log in, you will see the following message:
-
-[role="no_copy"]
-----
-Login Succeeded!
-----
-
-
-// =================================================================================================
-// Uploading images to a container registry
-// =================================================================================================
-
-== Uploading images to a container registry
-
-=== Building your Podman images
-
-The starting Java project, which you can find in the `start` directory, is a multi-module Maven
-project. It is made up of the `system` and `inventory` microservices. Each microservice exists in its own directory,
-`start/system` and `start/inventory`. Both of these directories contain a Containerfile, which is necessary
-for building the Podman images. If you're unfamiliar with Containerfile, check out the
-https://openliberty.io/guides/containerize.html[Containerizing microservices^] guide.
-
-Navigate to the `start` directory and run the following command:
-
-[role=command]
-```
-mvn package
-```
-
-Now that your microservices are packaged, build your 
-Podman images using the `podman build` command. To build your image, you need to have Podman installed 
-and your Podman daemon started.
-
-
-Run the following commands to build and containerize the application:
-
-[role='command']
-```
-podman build -t system:1.0-SNAPSHOT .
-```
-
-To verify that the images are built, run the `podman images` command to list all local Podman images:
-
-[role='command']
-```
-podman images
-```
-
-Your two images `system` and `inventory` should appear in the list of all Podman images:
-
-[role="no_copy"]
-----
-REPOSITORY    TAG             IMAGE ID        CREATED          SIZE
-inventory     1.0-SNAPSHOT    08fef024e986    4 minutes ago    471MB
-system        1.0-SNAPSHOT    1dff6d0b4f31    5 minutes ago    470MB
-----
-
-=== Pushing the images to a container registry
-
-Pushing the images to a registry allows the cluster to create pods using your container images.
-
-First, tag your container images with your registry.
-Replace `[registry-server]` with the server name of your container registry.
-To get the server for your registry, run the `az acr show -n [registry-name] --query loginServer` command.
-The `[registry-server]` looks like `[registry-name].azurecr.io`.
-
-[role=command]
-```
-podman tag system:1.0-SNAPSHOT [registry-server]/system:1.0-SNAPSHOT
-```
-
-Finally, push your images to the registry:
-
-[role=command]
-```
-podman push [registry-server]/system:1.0-SNAPSHOT
-```
-
-// =================================================================================================
-// Creating a Kubernetes cluster on AKS
-// =================================================================================================
-
-== Creating a Kubernetes cluster on AKS
 
 === Provisioning a cluster
 
@@ -505,6 +435,10 @@ aks-nodepool1-21407934-1   Ready    agent   2m48s   v1.12.8
 aks-nodepool1-21407934-2   Ready    agent   2m34s   v1.12.8
 ----
 
+// =================================================================================================
+// Storing registry credentials in a secret
+// =================================================================================================
+
 === Storing registry credentials in a secret
 
 To be able to pull the images from your Azure container registry, the credentials of your registry must be added to your service
@@ -537,48 +471,35 @@ secret/guidesecret created
 ----
 
 // =================================================================================================
-// Deploying microservices to AKS
+// Uploading images to a container registry
 // =================================================================================================
 
-== Deploying microservices to AKS
+== Uploading images to a container registry
 
-=== Creating a deployment definition
+// =================================================================================================
+// Pushing the images to a container registry
+// =================================================================================================
 
-Now that your container images are built and you have created a Kubernetes cluster, you can deploy the images using a Kubernetes resource definition.
+=== Pushing the images to a container registry
 
-A Kubernetes resource definition is a `yaml` file that contains a description of all your 
-deployments, services, or any other resources that you want to deploy. All resources can 
-also be deleted from the cluster by using the same `yaml` file that you used to deploy them.
-The [hotspot]`kubernetes.yaml` resource definition file is provided for you. If you are interested 
-in learning more about the Kubernetes resource definition, check out the 
-https://openliberty.io/guides/kubernetes-intro.html[Deploying microservices to Kubernetes^]
-guide.
+Pushing the images to a registry allows the cluster to create pods using your container images.
 
-[role="code_command hotspot file=0", subs="quotes"]
-----
-#Update the `kubernetes.yaml` file in the `start` directory.#
-`kubernetes.yaml`
-----
-[role="edit_command_text"]
-Replace [hotspot=sysImage hotspot=invImage file=0]`[registry-server]` with your container registry server.
-You can get the login server for your registry by running the `az acr show -n [registry-name] --query loginServer` command.
+First, tag your container images with your registry.
+Replace `[registry-server]` with the server name of your container registry.
+To get the server for your registry, run the `az acr show -n [registry-name] --query loginServer` command.
+The `[registry-server]` looks like `[registry-name].azurecr.io`.
 
-kubernetes.yaml
-[source, Text, linenums, indent=0, role="code_column"]
-----
-include::finish/kubernetes.yaml[]
-----
+[role=command]
+```
+podman tag system:1.0-SNAPSHOT [registry-server]/system:1.0-SNAPSHOT
+```
 
-The [hotspot=sysImage hotspot=invImage file=0]`image` is the name and tag of the container image that you want 
-to use for the container. The [hotspot]`kubernetes.yaml` file references the images that you pushed to your registry
-for the [hotspot=sysImage file=0]`system` and [hotspot=invImage file=0]`inventory` repositories. These images can be pulled
-with the [hotspot=sysSecret hotspot=invSecret file=0]`secret` that you defined before.
+Finally, push your images to the registry:
 
-The service that is used to expose your deployments has a type of [hotspot=sysLoadBalancer hotspot=invLoadBalancer file=0]`LoadBalancer`. 
-This means you can access these services from IP addresses that forward incoming traffic to your nodepool via a specific port.
-You can expose your services in other ways such as using a `NodePort` service type. 
-
-The service that is used to expose your deployments is [hotsport=createKnative] `KNative`. This means that you can access theese services from the [hotspot=exposed] `exposed` KNative endpoint. 
+[role=command]
+```
+podman push [registry-server]/system:1.0-SNAPSHOT
+```
 
 // =================================================================================================
 // Installing the Operator
@@ -656,43 +577,59 @@ Each CRD defines a kind of object that can be used, which is specified in the pr
 
 The `openlibertyapplications` CRD defines a set of configurations for deploying an Open Liberty-based application, including the application image, number of instances, and storage settings. The Open Liberty Operator watches for changes to instances of the `OpenLibertyApplication` object kind and creates Kubernetes resources that are based on the configuration that is defined in the CRD.
 
+// =================================================================================================
+// Deploying microservices to AKS
+// =================================================================================================
 
-=== Deploying your application
+== Deploying microservices to AKS
 
-To deploy your microservices to Azure Kubernetes Service, you need Kubernetes to create
-the contents of the [hotspot]`kubernetes.yaml` file. 
+// =================================================================================================
+// Creating a deployment definition
+// =================================================================================================
 
-Run the following command to deploy the resources defined in the [hotspot]`kubernetes.yaml` file:
+=== Creating a deployment definition
 
+Now that your container images are built and you have created a Kubernetes cluster, you can deploy the images using a Kubernetes resource definition.
 
-[role='command']
-```
-kubectl create -f kubernetes.yaml
-```
+A Kubernetes resource definition is a `yaml` file that contains a description of all your 
+deployments, services, or any other resources that you want to deploy. All resources can 
+also be deleted from the cluster by using the same `yaml` file that you used to deploy them.
+The [hotspot]`kubernetes.yaml` resource definition file is provided for you. If you are interested 
+in learning more about the Kubernetes resource definition, check out the 
+https://openliberty.io/guides/kubernetes-intro.html[Deploying microservices to Kubernetes^]
+guide.
 
-You will see an output similar to the following:
-
-[role="no_copy"]
+[role="code_command hotspot file=0", subs="quotes"]
 ----
-openlibertyapplication.apps.openliberty.io/system created
+#Update the `kubernetes.yaml` file in the `start` directory.#
+`kubernetes.yaml`
+----
+[role="edit_command_text"]
+Replace [hotspot=sysImage hotspot=invImage file=0]`[registry-server]` with your container registry server.
+You can get the login server for your registry by running the `az acr show -n [registry-name] --query loginServer` command.
+
+kubernetes.yaml
+[source, Text, linenums, indent=0, role="code_column"]
+----
+include::finish/kubernetes.yaml[]
 ----
 
-Run the following command to check the status of your pods:
-[role='command']
-```
-kubectl get pods
-```
+The [hotspot=sysImage hotspot=invImage file=0]`image` is the name and tag of the container image that you want 
+to use for the container. The [hotspot]`kubernetes.yaml` file references the images that you pushed to your registry
+for the [hotspot=sysImage file=0]`system` and [hotspot=invImage file=0]`inventory` repositories. These images can be pulled
+with the [hotspot=sysSecret hotspot=invSecret file=0]`secret` that you defined before.
 
-If all the pods are healthy and running, you see an output similar to the following:
-[role="no_copy"]
-----
-NAME                                        READY   STATUS    RESTARTS   AGE
-olo-controller-manager-b99549758-2ndw9      1/1     Running   0          65s
-system-6c594b4fb-jvzsc                      1/1     Running   0          20s
-system-semeru-compiler-1-64c696b88b-l5kqq   1/1     Running   0          41s
-system-semeru-compiler-1-64c696b88b-rlgkt   1/1     Running   0          41s
-system-semeru-compiler-1-64c696b88b-wnnnz   1/1     Running   0          41s
-----
+The service that is used to expose your deployments has a type of [hotspot=sysLoadBalancer hotspot=invLoadBalancer file=0]`LoadBalancer`. 
+This means you can access these services from IP addresses that forward incoming traffic to your nodepool via a specific port.
+You can expose your services in other ways such as using a `NodePort` service type. 
+
+The service that is used to expose your deployments is [hotsport=createKnative] `KNative`. This means that you can access theese services from the [hotspot=exposed] `exposed` KNative endpoint. 
+
+You 
+
+// =================================================================================================
+// Deploying your application
+// =================================================================================================
 
 === Deploying the image
 

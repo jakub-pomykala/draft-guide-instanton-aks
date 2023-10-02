@@ -7,8 +7,17 @@ metadata:
   name: system
 spec:
   # tag::sysImage[]
-  applicationImage: instanton.azurecr.io/system:1.0-SNAPSHOT
+  applicationImage: [registry-name].azurecr.io/system:1.0-SNAPSHOT
   # end::sysImage[]
+  # tag::createKNative[]
+  createKnativeService: true
+  # end::createKNative[]
+  # tag::service[]
+  service:
+    type: LoadBalancer
+    port: 9080
+    targetPort: 9080
+  # end::service[]
   pullPolicy: Always
   manageTLS: false
   expose: true
@@ -40,11 +49,22 @@ metadata:
   name: inventory
 spec:
   # tag::sysImage[]
-  applicationImage: instanton.azurecr.io/inventory:1.0-SNAPSHOT
+  applicationImage: [registry-name].azurecr.io/inventory:1.0-SNAPSHOT
   # end::sysImage[]
+  # tag::createKNative[]
+  createKnativeService: true
+  # end::createKNative[]
+  # tag::service[]
+  service:
+    type: LoadBalancer
+    port: 9081
+    targetPort: 9081
+  # end::service[]
   pullPolicy: Always
   manageTLS: false
+  # tag::expose[]
   expose: true
+  # end::expose[]
   pullSecret: guidesecret
   # tag::securityContext[]
   securityContext:
@@ -63,3 +83,7 @@ spec:
     enable: true
     replicas: 3
   # end::semeruCloudCompiler[]
+  env:
+  - name: system.http.port
+    value: "80"
+
