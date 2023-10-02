@@ -632,7 +632,7 @@ Now that your container images are built and you have created a Kubernetes clust
 A Kubernetes resource definition is a `yaml` file that contains a description of all your 
 deployments, services, or any other resources that you want to deploy. All resources can 
 also be deleted from the cluster by using the same `yaml` file that you used to deploy them.
-The `kubernetes.yaml` resource definition file is provided for you. If you are interested 
+The [hotspot]`kubernetes.yaml` resource definition file is provided for you. If you are interested 
 in learning more about the Kubernetes resource definition, check out the 
 https://openliberty.io/guides/kubernetes-intro.html[Deploying microservices to Kubernetes^]
 guide.
@@ -644,12 +644,11 @@ guide.
 `kubernetes.yaml`
 ----
 [role="edit_command_text"]
-Replace [hotspot=sysImage hotspot=invImage file=2]`[registry-name]` with your container registry server.
-
+Replace [hotspot=sysImage hotspot=invImage file=2]`[registry-server]` with your container registry server.
+You can get the login server for your registry by running the `az acr show -n [registry-name] --query loginServer` command.
 
 kubernetes.yaml
 [source, Text, linenums, indent=0, role="code_column"]
 ----
 include::finish/kubernetes.yaml[]
 ----
-
