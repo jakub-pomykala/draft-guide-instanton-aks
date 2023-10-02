@@ -30,19 +30,25 @@ spec:
   # end:sysSecret[]
   # tag::securityContextSys[]
   securityContext:
+    # tag::runAsNonRoot[]
     runAsNonRoot: true
+    # end::runAsNonRoot[]
     privileged: false
     allowPrivilegeEscalation: true
+    # tag::capabilities[]
     capabilities:
       add:
       - CHECKPOINT_RESTORE
       - SETPCAP
       drop:
       - ALL
+    # end::capabilities[]
   # end::securityContextSys[]
   # tag::semeruCloudCompilerSys[]
   semeruCloudCompiler:
+    # tag::enable[]
     enable: true
+    # end::enable[]
     replicas: 3
   # end::semeruCloudCompilerSys[]
 # end::system[]
