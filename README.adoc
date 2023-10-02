@@ -641,7 +641,7 @@ https://openliberty.io/guides/kubernetes-intro.html[Deploying microservices to K
 guide.
 
 // File 1
-[role="code_command hotspot file=1", subs="quotes"]
+[role="code_command hotspot file=2", subs="quotes"]
 ----
 #Create the `kubernetes.yaml` file in the `start` directory.#
 `kubernetes.yaml`
@@ -655,7 +655,7 @@ kubernetes.yaml
 include::finish/kubernetes.yaml[]
 ----
 
-The [hotspot=sysImage hotspot=invImage file=1]`image` is the name and tag of the container image that you want 
+The [hotspot=sysImage hotspot=invImage file=2]`image` is the name and tag of the container image that you want 
 to use for the container. The [hotspot]`kubernetes.yaml` file references the images that you pushed to your registry
 for the [hotspot=sysImage file=1]`system` and [hotspot=invImage file=1]`inventory` repositories. These images can be pulled
 with the [hotspot=sysSecret hotspot=invSecret file=1]`secret` that you defined before.
