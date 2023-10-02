@@ -665,7 +665,7 @@ The service that is used to expose your deployments has a type of [hotspot=sysLo
 This means you can access these services from IP addresses that forward incoming traffic to your nodepool via a specific port.
 You can expose your services in other ways such as using a `NodePort` service type. 
 
-The service that is used to expose your deployments is [hotspot=createKnative file=0] `KNative`. This means that you can access theese services from the [hotspot=exposed] `exposed` KNative endpoint. 
+The service that is used to expose your deployments is [hotspot=createKnative file=0]`KNative`. This means that you can access theese services from the [hotspot=exposed] `exposed` KNative endpoint. 
 
 // =================================================================================================
 // Deploying your application
