@@ -632,13 +632,13 @@ Now that your container images are built and you have created a Kubernetes clust
 A Kubernetes resource definition is a `yaml` file that contains a description of all your 
 deployments, services, or any other resources that you want to deploy. All resources can 
 also be deleted from the cluster by using the same `yaml` file that you used to deploy them.
-The [hotspot]`kubernetes.yaml` resource definition file is provided for you. If you are interested 
+The [hotspot file=2]`kubernetes.yaml` resource definition file is provided for you. If you are interested 
 in learning more about the Kubernetes resource definition, check out the 
 https://openliberty.io/guides/kubernetes-intro.html[Deploying microservices to Kubernetes^]
 guide.
 
 // File 2
-[role="code_command hotspot file=2", subs="quotes"]
+[role="code_command hotspot file=2",subs="quotes"]
 ----
 #Create the `kubernetes.yaml` file in the `start` directory.#
 `kubernetes.yaml`
