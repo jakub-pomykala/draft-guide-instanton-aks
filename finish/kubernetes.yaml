@@ -1,20 +1,22 @@
 # tag::system[]
 apiVersion: apps.openliberty.io/v1
-# tag::olappSystem[]
+# tag::olappSys[]
 kind: OpenLibertyApplication
-# end::olappSystem[]
+# end::olappSys[]
 metadata:
   name: system
 spec:
   # tag::sysImage[]
   applicationImage: [registry-name].azurecr.io/system:1.0-SNAPSHOT
   # end::sysImage[]
-  # tag::createKNativeSystem[]
+  # tag::createKNativeSys[]
   createKnativeService: true
-  # end::createKNativeSystem[]
+  # end::createKNativeSys[]
   # tag::service[]
   service:
+    # tag::sysLoadBalancer[]
     type: LoadBalancer
+    # end::sysLoadBalancer[]
     port: 9080
     targetPort: 9080
   # end::service[]
@@ -23,8 +25,10 @@ spec:
   # tag::exposeSystem[]
   expose: true
   # end::exposeSystem[]
+  # tag:sysSecret[]
   pullSecret: guidesecret
-  # tag::securityContextSystem[]
+  # end:sysSecret[]
+  # tag::securityContextSys[]
   securityContext:
     runAsNonRoot: true
     privileged: false
@@ -35,12 +39,12 @@ spec:
       - SETPCAP
       drop:
       - ALL
-  # end::securityContextSystem[]
-  # tag::semeruCloudCompilerSystem[]
+  # end::securityContextSys[]
+  # tag::semeruCloudCompilerSys[]
   semeruCloudCompiler:
     enable: true
     replicas: 3
-  # end::semeruCloudCompilerSystem[]
+  # end::semeruCloudCompilerSys[]
 # end::system[]
 ---
 # tag::inventory[]
@@ -51,25 +55,29 @@ kind: OpenLibertyApplication
 metadata:
   name: inventory
 spec:
-  # tag::inventoryImage[]
+  # tag::invImage[]
   applicationImage: [registry-name].azurecr.io/inventory:1.0-SNAPSHOT
-  # end::inventoryImage[]
-  # tag::createKNative[]
+  # end::invImage[]
+  # tag::createKNativeInv[]
   createKnativeService: true
-  # end::createKNative[]
+  # end::createKNativeInv[]
   # tag::service[]
   service:
+    # tag::invLoadBalancer[]
     type: LoadBalancer
+    # end::invLoadBalancer[]
     port: 9081
     targetPort: 9081
   # end::service[]
   pullPolicy: Always
   manageTLS: false
-  # tag::expose[]
+  # tag::exposeInv[]
   expose: true
-  # end::expose[]
+  # end::exposeInv[]
+  # tag:invSecret[]
   pullSecret: guidesecret
-  # tag::securityContext[]
+  # end:invSecret[]
+  # tag::securityContextInv[]
   securityContext:
     runAsNonRoot: true
     privileged: false
@@ -80,12 +88,12 @@ spec:
       - SETPCAP
       drop:
       - ALL
-  # end::securityContext[]
-  # tag::semeruCloudCompiler[]
+  # end::securityContextInv[]
+  # tag::semeruCloudCompilerInv[]
   semeruCloudCompiler:
     enable: true
     replicas: 3
-  # end::semeruCloudCompiler[]
+  # end::semeruCloudCompilerInv[]
   env:
   - name: system.http.port
     value: "80"
