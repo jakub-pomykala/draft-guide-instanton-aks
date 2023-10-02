@@ -301,7 +301,7 @@ Containerfile
 include::finish/system/Containerfile[]
 ----
 
-[role="code_command hotspot file=0",subs="quotes"]
+[role="code_command hotspot file=1",subs="quotes"]
 ----
 #Create the `Containerfile`.#
 `inventory/Containerfile`
