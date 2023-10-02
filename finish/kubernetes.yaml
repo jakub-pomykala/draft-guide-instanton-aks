@@ -89,4 +89,4 @@ spec:
   env:
   - name: system.http.port
     value: "80"
-
+# end::inventory[]
