@@ -665,7 +665,7 @@ The service that is used to expose your deployments has a type of [hotspot=sysLo
 This means you can access these services from IP addresses that forward incoming traffic to your nodepool via a specific port.
 You can expose your services in other ways such as using a `NodePort` service type. 
 
-The service that is used to expose your deployments is [hotsport=createKnative] `KNative`. This means that you can access theese services from the [hotspot=exposed] `exposed` KNative endpoint. 
+The service that is used to expose your deployments is [hotspot=createKnative] `KNative`. This means that you can access theese services from the [hotspot=exposed] `exposed` KNative endpoint. 
 
 // =================================================================================================
 // Deploying your application
@@ -677,7 +677,7 @@ You can configure the specifics of the Open Liberty Operator-controlled deployme
 
 [role="code_command hotspot", subs="quotes"]
 ----
-#Create the kubernetes.yaml configuration file in the start directory.#
+#Update the kubernetes.yaml configuration file in the start directory.#
 `kubernetes.yaml`
 ----
 
@@ -689,7 +689,7 @@ kubernetes.yaml
 include::finish/kubernetes.yaml[]
 ----
 
-The [hotspot file=0]`kubernetes.yaml` file is configured to deploy two of resources of the [hotspot=olappSystem hotspot=olapp file=0]`OpenLibertyApplication` kind, [hotspot=system file=0]`system` and [hotspot=inventory file=0]`inventory`, which is controlled by the Open Liberty Operator.
+The [hotspot file=2]`kubernetes.yaml` file is configured to deploy two of resources of the [hotspot=olappSystem hotspot=olapp file=0]`OpenLibertyApplication` kind, [hotspot=system file=0]`system` and [hotspot=inventory file=0]`inventory`, which is controlled by the Open Liberty Operator.
 
 The [hotspot=sysImage file=0]`applicationImage` parameter defines what container image is deployed as part of the `OpenLibertyApplication` CRD. Update [hotspot=sysImage file=0]`[system-repository-uri]` in the `applicationImage` field to point to your `system` repository URI.
 
