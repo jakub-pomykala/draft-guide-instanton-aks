@@ -1,17 +1,17 @@
 # tag::system[]
 apiVersion: apps.openliberty.io/v1
-# tag::olapp[]
+# tag::olappSystem[]
 kind: OpenLibertyApplication
-# end::olapp[]
+# end::olappSystem[]
 metadata:
   name: system
 spec:
   # tag::sysImage[]
   applicationImage: [registry-name].azurecr.io/system:1.0-SNAPSHOT
   # end::sysImage[]
-  # tag::createKNative[]
+  # tag::createKNativeSystem[]
   createKnativeService: true
-  # end::createKNative[]
+  # end::createKNativeSystem[]
   # tag::service[]
   service:
     type: LoadBalancer
@@ -20,9 +20,11 @@ spec:
   # end::service[]
   pullPolicy: Always
   manageTLS: false
+  # tag::exposeSystem[]
   expose: true
+  # end::exposeSystem[]
   pullSecret: guidesecret
-  # tag::securityContext[]
+  # tag::securityContextSystem[]
   securityContext:
     runAsNonRoot: true
     privileged: false
@@ -33,12 +35,12 @@ spec:
       - SETPCAP
       drop:
       - ALL
-  # end::securityContext[]
-  # tag::semeruCloudCompiler[]
+  # end::securityContextSystem[]
+  # tag::semeruCloudCompilerSystem[]
   semeruCloudCompiler:
     enable: true
     replicas: 3
-  # end::semeruCloudCompiler[]
+  # end::semeruCloudCompilerSystem[]
 # end::system[]
 ---
 # tag::inventory[]
