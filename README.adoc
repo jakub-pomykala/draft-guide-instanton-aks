@@ -641,7 +641,7 @@ https://openliberty.io/guides/kubernetes-intro.html[Deploying microservices to K
 guide.
 
 // File 2
-[role="code_command hotspot file=2", subs="quotes"]
+[role="code_command hotspot file=0", subs="quotes"]
 ----
 #Create the `kubernetes.yaml` file in the `start` directory.#
 `kubernetes.yaml`
@@ -656,7 +656,7 @@ kubernetes.yaml
 include::finish/kubernetes.yaml[]
 ----
 
-The [hotspot=sysImage hotspot=invImage file=2]`image` is the name and tag of the container image that you want 
+The [hotspot=sysImage hotspot=invImage file=0]`image` is the name and tag of the container image that you want 
 to use for the container. The [hotspot]`kubernetes.yaml` file references the images that you pushed to your registry
 for the [hotspot=sysImage file=0]`system` and [hotspot=invImage file=0]`inventory` repositories. These images can be pulled
 with the [hotspot=sysSecret hotspot=invSecret file=0]`secret` that you defined before.
@@ -677,7 +677,7 @@ You can configure the specifics of the Open Liberty Operator-controlled deployme
 
 [role="code_command hotspot", subs="quotes"]
 ----
-#Update the kubernetes.yaml configuration file in the start directory.#
+#Create the kubernetes.yaml configuration file in the start directory.#
 `kubernetes.yaml`
 ----
 
@@ -689,7 +689,7 @@ kubernetes.yaml
 include::finish/kubernetes.yaml[]
 ----
 
-The [hotspot file=2]`kubernetes.yaml` file is configured to deploy two of resources of the [hotspot=olappSystem hotspot=olapp file=0]`OpenLibertyApplication` kind, [hotspot=system file=0]`system` and [hotspot=inventory file=0]`inventory`, which is controlled by the Open Liberty Operator.
+The [hotspot file=0]`kubernetes.yaml` file is configured to deploy two of resources of the [hotspot=olappSystem hotspot=olapp file=0]`OpenLibertyApplication` kind, [hotspot=system file=0]`system` and [hotspot=inventory file=0]`inventory`, which is controlled by the Open Liberty Operator.
 
 The [hotspot=sysImage file=0]`applicationImage` parameter defines what container image is deployed as part of the `OpenLibertyApplication` CRD. Update [hotspot=sysImage file=0]`[system-repository-uri]` in the `applicationImage` field to point to your `system` repository URI.
 
