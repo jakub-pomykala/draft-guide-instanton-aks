@@ -51,9 +51,9 @@ kind: OpenLibertyApplication
 metadata:
   name: inventory
 spec:
-  # tag::sysImage[]
+  # tag::inventoryImage[]
   applicationImage: [registry-name].azurecr.io/inventory:1.0-SNAPSHOT
-  # end::sysImage[]
+  # end::inventoryImage[]
   # tag::createKNative[]
   createKnativeService: true
   # end::createKNative[]
