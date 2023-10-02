@@ -638,13 +638,13 @@ https://openliberty.io/guides/kubernetes-intro.html[Deploying microservices to K
 guide.
 
 // File 2
-[role="code_command hotspot file=2",subs="quotes"]
+[role="code_command hotspot file=2", subs="quotes"]
 ----
-#Create the `kubernetes.yaml` file in the `start` directory.#
+#Update the `kubernetes.yaml` file in the `start` directory.#
 `kubernetes.yaml`
 ----
 [role="edit_command_text"]
-Replace the [hotspot=sysImage hotspot=sysImage hotspot=invImage file=2]`[registry-name]` with your container registry name.
+Replace [hotspot=sysImage hotspot=invImage file=2]`[registry-name]` with your container registry server.
 
 kubernetes.yaml
 [source, Text, linenums, indent=0, role="code_column"]
