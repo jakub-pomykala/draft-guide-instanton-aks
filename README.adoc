@@ -629,6 +629,9 @@ The `openlibertyapplications` CRD defines a set of configurations for deploying 
 // =================================================================================================
 // Creating a deployment definition
 // =================================================================================================
+
+=== Creating a deployment definition
+
 Now that your container images are built and you have created a Kubernetes cluster, you can deploy the images using a Kubernetes resource definition.
 
 A Kubernetes resource definition is a `yaml` file that contains a description of all your 
