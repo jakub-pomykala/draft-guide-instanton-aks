@@ -648,9 +648,9 @@ guide.
 Replace [hotspot=sysImage hotspot=invImage file=2]`[registry-server]` with your container registry server.
 You can get the login server for your registry by running the `az acr show -n [registry-name] --query loginServer` command.
 
-
+// File 0
 kubernetes.yaml
-[source, Text, linenums, indent=0, role="code_column"]
+[source, yaml, linenums, indent=0, role="code_column"]
 ----
 include::finish/kubernetes.yaml[]
 ----
@@ -672,3 +672,20 @@ The service that is used to expose your deployments is [hotspot=createKnative fi
 
 
 === Creating a deployment definition
+
+=== Deploying the image
+
+You can configure the specifics of the Open Liberty Operator-controlled deployment with a YAML configuration file.
+
+[role="code_command hotspot file=2", subs="quotes"]
+----
+#Update the kubernetes.yaml configuration file in the start directory.#
+`kubernetes.yaml`
+----
+
+
+kubernetes.yaml
+[source, yaml, linenums, role='code_column']
+----
+include::finish/kubernetes.yaml[]
+----
