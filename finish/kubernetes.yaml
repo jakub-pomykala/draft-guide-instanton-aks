@@ -25,9 +25,9 @@ spec:
   # tag::exposeSystem[]
   expose: true
   # end::exposeSystem[]
-  # tag:sysSecret[]
+  # tag::sysSecret[]
   pullSecret: guidesecret
-  # end:sysSecret[]
+  # end::sysSecret[]
   # tag::securityContextSys[]
   securityContext:
     # tag::runAsNonRoot[]
@@ -80,9 +80,9 @@ spec:
   # tag::exposeInv[]
   expose: true
   # end::exposeInv[]
-  # tag:invSecret[]
+  # tag::invSecret[]
   pullSecret: guidesecret
-  # end:invSecret[]
+  # end::invSecret[]
   # tag::securityContextInv[]
   securityContext:
     runAsNonRoot: true
