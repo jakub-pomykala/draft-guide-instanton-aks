@@ -290,12 +290,12 @@ To containize your microservice, use the `kernel-slim-java17-openj9-ubi` Liberty
  
 [role="code_command hotspot file=0",subs="quotes"]
 ----
-#Create the `Containerfile`.#
+#Create the `system/Containerfile`.#
 `system/Containerfile`
 ----
 
 // File 0
-Containerfile
+system/Containerfile
 [source, text, linenums, role="code_column"]
 ----
 include::finish/system/Containerfile[]
@@ -303,12 +303,12 @@ include::finish/system/Containerfile[]
 
 [role="code_command hotspot file=1",subs="quotes"]
 ----
-#Create the `Containerfile`.#
+#Create the `inventory/Containerfile`.#
 `inventory/Containerfile`
 ----
 
 // File 1
-Containerfile
+inventory/Containerfile
 [source, text, linenums, role="code_column"]
 ----
 include::finish/inventory/Containerfile[]
