@@ -7,7 +7,7 @@ metadata:
   name: system
 spec:
   # tag::sysImage[]
-  applicationImage: [registry-name].azurecr.io/system:1.0-SNAPSHOT
+  applicationImage: [registry-server]/system:1.0-SNAPSHOT
   # end::sysImage[]
   # tag::createKNativeSys[]
   createKnativeService: true
@@ -55,9 +55,9 @@ spec:
 ---
 # tag::inventory[]
 apiVersion: apps.openliberty.io/v1
-# tag::olapp[]
+# tag::olappInv[]
 kind: OpenLibertyApplication
-# end::olapp[]
+# end::olappInv[]
 metadata:
   name: inventory
 spec:
@@ -88,12 +88,14 @@ spec:
     runAsNonRoot: true
     privileged: false
     allowPrivilegeEscalation: true
+    # tag::capabilities[]
     capabilities:
       add:
       - CHECKPOINT_RESTORE
       - SETPCAP
       drop:
       - ALL
+    # end::capabilities[]
   # end::securityContextInv[]
   # tag::semeruCloudCompilerInv[]
   semeruCloudCompiler:

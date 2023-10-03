@@ -665,8 +665,6 @@ The service that is used to expose your deployments has a type of [hotspot=sysLo
 This means you can access these services from IP addresses that forward incoming traffic to your nodepool via a specific port.
 You can expose your services in other ways such as using a `NodePort` service type. 
 
-The service that is used to expose your deployments is [hotspot=createKNativeSys hotspot=createKNativeInv file=0]`KNative`. This means that you can access theese services from the [hotspot=exposeSystem hotspot=exposeInv file=0]`exposed` KNative endpoint. 
-
 // =================================================================================================
 // Deploying your application
 // =================================================================================================
@@ -675,21 +673,9 @@ The service that is used to expose your deployments is [hotspot=createKNativeSys
 
 You can configure the specifics of the Open Liberty Operator-controlled deployment with a YAML configuration file.
 
-[role="code_command hotspot file=0", subs="quotes"]
-----
-#Update the kubernetes.yaml configuration file in the start directory.#
-`kubernetes.yaml`
-----
+The [hotspot file=0]`kubernetes.yaml` file is configured to deploy two of resources of the [hotspot=olappSys hotspot=olappInv file=0]`OpenLibertyApplication` kind, [hotspot=system file=0]`system` and [hotspot=inventory file=0]`inventory`, which are controlled by the Open Liberty Operator.
 
-kubernetes.yaml
-[source, yaml, linenums, role='code_column']
-----
-include::finish/kubernetes.yaml[]
-----
-
-The [hotspot file=0]`kubernetes.yaml` file is configured to deploy two of resources of the [hotspot=olappSys hotspot=olapp file=0]`OpenLibertyApplication` kind, [hotspot=system file=0]`system` and [hotspot=inventory file=0]`inventory`, which is controlled by the Open Liberty Operator.
-
-The [hotspot=sysImage file=0]`applicationImage` parameter defines what container image is deployed as part of the `OpenLibertyApplication` CRD. Update [hotspot=sysImage file=0]`[system-repository-uri]` in the `applicationImage` field to point to your `system` repository URI.
+The [hotspot=sysImage file=0]`applicationImage` for the `system` service and the [hotspot=sysImage file=0]`applicationImage` for the `inventory` service parameter defines what container image is deployed as part of the `OpenLibertyApplication` CRD.
 
 In [hotspot=securityContext file=0]`securityContext` configuration, the [hotspot=runAsNonRoot file=0]`runAsNonRoot` cofiguration specifies that for any configuration in the pod, all processes run with a non-root user ID. With the [hotspot=capabilities file=0]`capabailities` configuration, we are only adding the the  `CHECKPOINT_RESTORE` and `SETCAP` capabilities for our InstantOn image and dropping all the remaining capabilities by specifying [hotspot=ALL file=0]`ALL` in the `capabilities.drop`. 
 
