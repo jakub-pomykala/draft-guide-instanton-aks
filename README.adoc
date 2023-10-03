@@ -659,7 +659,7 @@ include::finish/kubernetes.yaml[]
 
 The [hotspot=sysImage hotspot=invImage file=0]`image` is the name and tag of the container image that you want 
 to use for the container. The [hotspot]`kubernetes.yaml` file references the images that you pushed to your registry
-for the [hotspot=sysImage file=0]`system` and [hotspot=invImage file=0]`inventory` repositories. These images can be pulled with the [hotspot=sysSecret file=0]`secret` that you created before.
+for the [hotspot=sysImage file=0]`system` and [hotspot=invImage file=0]`inventory` repositories. These images can be pulled with the [hotspot=sysSecret hotspot=invSecret file=0]`secret` that you created before.
 
 The service that is used to expose your deployments has a type of [hotspot=sysLoadBalancer hotspot=invLoadBalancer file=0]`LoadBalancer`. 
 This means you can access these services from IP addresses that forward incoming traffic to your nodepool via a specific port.
