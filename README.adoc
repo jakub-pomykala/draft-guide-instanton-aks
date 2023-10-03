@@ -50,7 +50,7 @@ https://openliberty.io/docs/latest/instanton.html[Open Liberty InstantOn^] provi
 
 Semeru Cloud Compiler uses the https://eclipse.dev/openj9/docs/jitserver[JITServer^] (Just-in-Time Server) technology that is included in the https://www.eclipse.org/openj9/[Eclipse OpenJ9 JVM^]. It decouples the JIT compiler from the JVM to prevent your Java application from suffering possible negative effects due to CPU and memory consumption caused by JIT compilation in the JVM.
 
-image::checkpoint_diagram.png[Deployment,align="center"]
+image::JIT_diagram.png[JIT_Diagram,align="center"]
 
 Microsoft Azure offers a managed Kubernetes service called Azure Kubernetes Services (AKS). AKS simplifies the process of running Kubernetes on Azure without needing to install or maintain your Kubernetes control plane. It provides a hosted kubernetes cluster where you can deploy your microservices. You will use AKS with Azure Container Registry. Azure Container Registry is a private registry that is used to store and distribute your container images. Note, Azure Container Registry is a paid service but there is a option for a free trial which you can setup by visting https://azure.microsoft.com/en-gb/free[Try Azure for free^] and following the instructions. 
 
