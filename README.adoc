@@ -789,11 +789,27 @@ kubernetes.yaml
 include::finish/kubernetes.yaml[]
 ----
 
+// =================================================================================================
+// Installing KNative Serving
+// =================================================================================================
+=== Installing KNative Serving
+
+To have KNative serving available it requires a few installtion steps to be run.
+[role=command]
+```
+kubectl apply -f kubernetes.yaml
+```
+
+
 
 // =================================================================================================
-// Deploying your application
+// Enabling KNative Serving
 // =================================================================================================
 === Enabling KNative Serving
+
+By using KNative serving you have the benefit of rapid deployment of serverless containers. 
+
+To enable KNative serving add in the [hotspot=createKNativeSys hotspot=createKNativeInv file=0]`CreateKnativeService` to both the `system` and `inventory` service.
 
 [role="code_command hotspot file=0", subs="quotes"]
 ----
@@ -805,3 +821,32 @@ kubernetes.yaml
 ----
 include::finish/kubernetes.yaml[]
 ----
+
+Run the following command to re apply the deployment to the `system` and `inventory` InstantOn images to your AKS:
+[role=command]
+```
+kubectl apply -f kubernetes.yaml
+```
+
+These services will now be KNative services instead of normal kubernetes services. To get the addresses for these run:
+[role='command']
+```
+kubectl get ksvc
+```
+
+Upon running the above you will see the following:
+
+----
+NAME        URL                                              LATESTCREATED     LATESTREADY       READY   REASON
+inventory   http://inventory.default.20.26.166.49.sslip.io   inventory-00001   inventory-00001   False   NotOwned
+system      http://system.default.20.26.166.49.sslip.io      system-00001      system-00001      False   NotOwned
+----
+
+Once the services are ready you should expect to see something similair to below: 
+----
+NAME        URL                                              LATESTCREATED     LATESTREADY       READY   REASON
+inventory   http://inventory.default.20.26.166.49.sslip.io   inventory-00001   inventory-00001   True
+system      http://system.default.20.26.166.49.sslip.io      system-00001      system-00001      True
+----
+
+Because the have the `system` and  `inventory` still have [hotspot=exposeSystem hotspot=exposeInv file=0]`expose` parameter set to `true` you can now access these services using the URLs provided in the output above. 
