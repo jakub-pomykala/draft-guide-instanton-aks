@@ -701,7 +701,69 @@ olo-controller-manager-b99549758-8bcfh   1/1     Running   0             15m
 system-6ff57df9-4zp2p                    1/1     Running   0             35s
 ----
 
-=== Deploying your application
+=== Making requests to the microservices
+
+You need the external IP addresses that are associated with the `system` and `inventory` services to try out your microservices.
+
+Take note of the `EXTERNAL-IP` in the output of the following commands. It is the 
+hostname that you will later substitute into `[EXTERNAL-IP]` to access the `system` and `inventory` services.
+
+View the information of the `system` service to see its `EXTERNAL-IP` address:
+
+[role='command']
+```
+kubectl get svc/system
+```
+
+You need to wait a while for the `EXTERNAL-IP` to change from `<pending>` to an IP address.
+
+[role="no_copy"]
+----
+NAME                TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)           AGE
+system              LoadBalancer   10.0.219.9     <pending>       9080:30206/TCP    26s
+----
+
+[role="no_copy"]
+----
+NAME                TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)           AGE
+system              LoadBalancer   10.0.219.9     20.26.64.170    9080:30206/TCP    74s
+----
+
+View the information of the `inventory` service to see its `EXTERNAL-IP` address:
+
+[role='command']
+```
+kubectl get svc/inventory
+```
+
+You will need to wait a while for the `EXTERNAL-IP` to change from `<pending>` to an IP address.
+
+[role="no_copy"]
+----
+NAME                TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)           AGE
+inventory           LoadBalancer   10.0.175.197   <pending>       9081:32363/TCP    69s
+----
+
+[role="no_copy"]
+----
+NAME                TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)           AGE
+inventory           LoadBalancer   10.0.175.197   20.26.64.162  9081:32363/TCP      2m8s
+----
+
+To access your microservices, point your browser to the following URLs, substituting the appropriate `EXTERNAL-IP` hostnames
+for the `system` and `inventory` services:
+
+* `{system-api}`
+* `{inventory-api}`
+
+In the first URL, you see a result in JSON format with the system properties of the container JVM.
+The second URL returns an empty list, which is expected because no system properties are stored in the inventory yet. 
+
+Point your browser to the `{inventory-api}/[system-EXTERNAL-IP]` URL. When you visit this URL, these system
+properties are automatically stored in the inventory. Go back to `{inventory-api}` and
+you see a new entry for `[system-EXTERNAL-IP]`.
+
+=== Enabling Semeru Cloud Compiler
 
 Semeru Cloud Comiler server instance provides real-time code compiling as a process, independent of the application.
 
