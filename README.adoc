@@ -777,9 +777,38 @@ To configure the Semeru Cloud Compiler to handle Just-In-time (JIT) compilation 
 You are not required to specify the amount of replices as the default is `1`. Another parameter that you can specify is the `resource`; this is the resource requests and limits for the Semeru Cloud Compiler. The CPU deafults to `100m` with a limit of `2000m`.
 The memory defaults to `800Mi`, with a limit of `1200Mi`. To find out more you can visit link:https://github.com/OpenLiberty/open-liberty-operator/blob/main/doc/user-guide-v1.adoc[Open Liberty Operator v1.2.0+ documentation].
 
+[role="code_command hotspot file=0", subs="quotes"]
+----
+#Create the `kubernetes.yaml`.#
+`kubernetes.yaml`
+----
+[role="edit_command_text"]
+Replace [hotspot=sysImage hotspot=invImage file=0]`[registry-server]` with your container registry server.
+You can get the login server for your registry by running the `az acr show -n [registry-name] --query loginServer` command.
+
+kubernetes.yaml
+[source, yaml, linenums, indent=0, role="code_column hide_tags=createKNativeSys,createKNativeInv"]
+----
+include::finish/kubernetes.yaml[]
+----
+
 
 // =================================================================================================
 // Deploying your application
 // =================================================================================================
 === Enabling KNative Serving
 
+[role="code_command hotspot file=0", subs="quotes"]
+----
+#Create the `kubernetes.yaml`.#
+`kubernetes.yaml`
+----
+[role="edit_command_text"]
+Replace [hotspot=sysImage hotspot=invImage file=0]`[registry-server]` with your container registry server.
+You can get the login server for your registry by running the `az acr show -n [registry-name] --query loginServer` command.
+
+kubernetes.yaml
+[source, yaml, linenums, indent=0, role="code_column"]
+----
+include::finish/kubernetes.yaml[]
+----
