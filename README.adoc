@@ -705,6 +705,21 @@ olo-controller-manager-b99549758-8bcfh      1/1     Running   0          15m
 system-6ff57df9-4zp2p                       1/1     Running   0          35s
 ----
 
+
+By running the logs command you will be able to see the `system` service logs
+[role=command]
+```
+kubectl logs system-6ff57df9-4zp2p
+```
+
+The below is part of the logs that you should expect to see
+[role="no_copy"]
+----
+{"type":"liberty_message","host":"localhost","ibm_userDir":"\/opt\/ol\/wlp\/usr\/","ibm_serverName":"defaultServer","message":"CWWKF0011I: The defaultServer server is ready to run a smarter planet. The defaultServer server started in 0.148 seconds.","ibm_threadId":"0000003a","ibm_datetime":"2023-10-03T15:33:20.050+0000","ibm_messageId":"CWWKF0011I","module":"com.ibm.ws.kernel.feature.internal.FeatureManager","loglevel":"AUDIT","ibm_sequence":"1696347200050_000000000001F","ext_thread":"Default Executor-thread-1"}
+----
+
+If you inspect the above you can see "The defaultServer server started in 0.148 seconds." showing you that the InstantOn has successfully run
+
 === Making requests to the microservices
 
 You need the external IP addresses that are associated with the `system` and `inventory` services to try out your microservices.
@@ -888,3 +903,86 @@ system      http://system.default.20.26.166.49.sslip.io      system-00001      s
 ----
 
 Because the have the `system` and  `inventory` still have [hotspot=exposeSystem hotspot=exposeInv file=0]`expose` parameter set to `true` you can now access these services using the URLs provided in the output above. 
+
+// =================================================================================================
+// Testing microservices that are running on Azure AKS
+// =================================================================================================
+
+== Testing microservices that are running on Azure AKS
+
+//File 0
+pom.xml
+[source, xml, linenums, role='code_column']
+----
+include::finish/system/pom.xml[]
+----
+
+A few tests are included for you to test the basic functionality of the microservices. If a test failure occurs, then you might have introduced a bug into the code. To run the tests, wait for all pods to be in the ready state before you proceed further. The default properties defined in the [hotspot file=3]`pom.xml` file are:
+
+[cols="15, 100", options="header"]
+|===
+| *Property*                                | *Description*
+| [hotspot=cluster file=3]`cluster.ip`                         | IP or hostname for your cluster.
+| [hotspot=system-service file=3]`system.kube.service`         | Name of the Kubernetes Service wrapping the `system-service` pods.
+| [hotspot=system-node-port file=3]`system.node.port`          | The NodePort of the Kubernetes Service `system-service`, 31000 by default.
+|===
+
+Use the following command to run the integration tests against your cluster. Substitute `[hostname]` with the appropriate value:
+
+[role=command]
+```
+mvn failsafe:integration-test -Dcluster.ip=[hostname]
+```
+
+If the tests pass, you see an output for each service similar to the following:
+
+[source, role="no_copy"]
+----
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running it.io.openliberty.guides.system.SystemEndpointIT
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.673 sec - in it.io.openliberty.guides.system.SystemEndpointIT
+
+Results:
+
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+----
+
+// =================================================================================================
+// Tear Down
+// =================================================================================================
+
+== Tearing down the environment
+
+It is important to clean up your resources when you are finished with the guide so that you do not incur extra charges for ongoing usage.
+
+When you no longer need your deployed microservices, you can delete all {kube} resources 
+by running the `kubectl delete` command:
+
+[role='command']
+```
+kubectl delete -f kubernetes.yaml
+```
+
+Because you are done testing your cluster, clean up all of its related sources using the `az group delete` command.
+This command removes the resource group, container service, and all related resources:
+
+[role='command']
+```
+az group delete -g guideGroup --yes --no-wait
+```
+
+// =================================================================================================
+// finish
+// =================================================================================================
+
+== Great work! You're done!
+
+You just deployed two microservices running in Open Liberty with InstantOn and Semeru Cloud Compiler on KNative Serving to Azure AKS using Kubernetes.
+// Multipane
+include::{common-includes}/attribution.adoc[subs="attributes"]
+
+// DO NO CREATE ANYMORE SECTIONS AT THIS POINT
+// Related guides will be added in automatically here if you included them in ":page-related-guides"
