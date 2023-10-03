@@ -798,20 +798,52 @@ include::finish/kubernetes.yaml[]
 // =================================================================================================
 === Installing KNative Serving
 
+By using KNative serving you have the benefit of rapid deployment of serverless containers. 
+
 To have KNative serving available it requires a few installtion steps to be run.
+
+Firstly you might be required to give permissions the `configure-knative.sh` script.
+You can do this by running:
+[role=command]
+```
+chmod +x scripts/configure-knative.sh
+```
+
+Next run the script:
+[role=command]
+```
+./scripts/configure-knative.sh
+```
+
+Now you can apply the Knative Serving deployment by running 
 [role=command]
 ```
 kubectl apply -f kubernetes.yaml
 ```
 
+You can verify that KNative was successfully installed by running the following command:
+[role=command]
+```
+k get pods -A | grep knative
+```
 
+You should see output similair to the below:
+[role="no_copy"]
+----
+knative-serving   activator-7499d967fc-6d4xp                1/1     Running     0          10m
+knative-serving   autoscaler-568989dd8c-7hl9l               1/1     Running     0          10m
+knative-serving   controller-76c798ffcb-xh7vs               1/1     Running     0          10m
+knative-serving   default-domain-bpzxs                      0/1     Completed   0          10m
+knative-serving   domain-mapping-7748ff49d4-wvcdn           1/1     Running     0          10m
+knative-serving   domainmapping-webhook-755d864f5c-kgwc2    1/1     Running     0          10m
+knative-serving   net-kourier-controller-79c998474f-db645   1/1     Running     0          10m
+knative-serving   webhook-8466d59795-5kjsk                  1/1     Running     0          10m
+----
 
 // =================================================================================================
 // Enabling KNative Serving
 // =================================================================================================
 === Enabling KNative Serving
-
-By using KNative serving you have the benefit of rapid deployment of serverless containers. 
 
 To enable KNative serving add in the [hotspot=createKNativeSys hotspot=createKNativeInv file=0]`CreateKnativeService` to both the `system` and `inventory` service.
 
