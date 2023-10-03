@@ -692,6 +692,15 @@ When the images are deployed, run the following command to check the status of y
 kubectl get pods
 ```
 
+If all the pods are healthy and running, you see an output similar to the following:
+[source, role="no_copy"]
+----
+NAME                                        READY   STATUS    RESTARTS   AGE
+inventory-84fc67d49c-z98z4               1/1     Running   0             35s
+olo-controller-manager-b99549758-8bcfh   1/1     Running   0             15m
+system-6ff57df9-4zp2p                    1/1     Running   0             35s
+----
+
 === Deploying your application
 
 Semeru Cloud Comiler server instance provides real-time code compiling as a process, independent of the application.
