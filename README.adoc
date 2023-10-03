@@ -973,3 +973,38 @@ Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
 // =================================================================================================
 // Tearing down the environment
 // =================================================================================================
+
+== Tearing down the environment
+
+It is important to clean up your resources when you are finished with the guide so that you do not incur extra charges for ongoing usage.
+
+When you no longer need your deployed microservices, you can delete all {kube} resources 
+by running the `kubectl delete` command:
+
+[role='command']
+```
+kubectl delete -f kubernetes.yaml
+```
+
+Because you are done testing your cluster, clean up all of its related sources using the `az group delete` command.
+This command removes the resource group, container service, and all related resources:
+
+[role='command']
+```
+az group delete -g guideGroup --yes --no-wait
+```
+
+// =================================================================================================
+// finish
+// =================================================================================================
+
+== Great work! You're done!
+
+You have just deployed two microservices running in Open Liberty to Azure Kubernetes Service (AKS). You also 
+learned how to use `kubectl` to deploy your microservices on a {kube} cluster.
+
+// Multipane
+include::{common-includes}/attribution.adoc[subs="attributes"]
+
+// DO NO CREATE ANYMORE SECTIONS AT THIS POINT
+// Related guides will be added in automatically here if you included them in ":page-related-guides"
