@@ -640,16 +640,35 @@ guide.
 
 [role="code_command hotspot file=2", subs="quotes"]
 ----
-#Create the `kubernetes.yaml` file in the `start` directory.#
+#Create the `kubernetes.yaml`.#
 `kubernetes.yaml`
 ----
+
 [role="edit_command_text"]
 Replace [hotspot=sysImage hotspot=invImage file=2]`[registry-server]` with your container registry server.
 You can get the login server for your registry by running the `az acr show -n [registry-name] --query loginServer` command.
 
-// File 2
+
 kubernetes.yaml
 [source, Text, linenums, indent=0, role="code_column"]
 ----
 include::finish/kubernetes.yaml[]
 ----
+
+The [hotspot=sysImage hotspot=invImage file=2]`image` is the name and tag of the container image that you want 
+to use for the container. The [hotspot]`kubernetes.yaml` file references the images that you pushed to your registry
+for the [hotspot=sysImage file=2]`system` and [hotspot=invImage file=2]`inventory` repositories. These images can be pulled
+with the [hotspot=sysSecret hotspot=invSecret file=2]`secret` that you defined before.
+
+The service that is used to expose your deployments has a type of [hotspot=sysLoadBalancer hotspot=invLoadBalancer file=2]`LoadBalancer`. 
+This means you can access these services from IP addresses that forward incoming traffic to your nodepool via a specific port.
+You can expose your services in other ways such as using a `NodePort` service type. 
+
+The service that is used to expose your deployments is [hotspot=createKnative file=2]`KNative`. This means that you can access theese services from the [hotspot=exposed file=2] `exposed` KNative endpoint. 
+
+// =================================================================================================
+// Deploying your application
+// =================================================================================================
+
+
+=== Creating a deployment definition
