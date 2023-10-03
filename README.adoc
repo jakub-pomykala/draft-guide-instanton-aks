@@ -638,9 +638,8 @@ https://openliberty.io/guides/kubernetes-intro.html[Deploying microservices to K
 guide.
 
 // File 2
-[role="code_command hotspot file=2", subs="quotes"]
+[role="code_command hotspot file=2",subs="quotes"]
 ----
-#Update the `kubernetes.yaml` file in the `start` directory.#
+#Create the `kubernetes.yaml` file in the `start` directory.#
 `kubernetes.yaml`
 ----
-
