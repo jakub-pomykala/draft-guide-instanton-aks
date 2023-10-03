@@ -784,7 +784,7 @@ The memory defaults to `800Mi`, with a limit of `1200Mi`. To find out more you c
 ----
 
 kubernetes.yaml
-[source, yaml, linenums, indent=0, role="code_column hide_tags=createKNativeSys,createKNativeInv"]
+[source, yaml, linenums, indent=0, role="code_column hide_tags=createKNativeSys,createKNativeInv,env"]
 ----
 include::finish/kubernetes.yaml[]
 ----
