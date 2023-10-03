@@ -102,7 +102,9 @@ spec:
     enable: true
     replicas: 3
   # end::semeruCloudCompilerInv[]
+  # tag::env[]
   env:
   - name: system.http.port
     value: "80"
+  # end::env[]
 # end::inventory[]
