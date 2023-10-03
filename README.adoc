@@ -638,3 +638,10 @@ The [hotspot]`kubernetes.yaml` resource definition file is provided for you. If 
 in learning more about the Kubernetes resource definition, check out the 
 https://openliberty.io/guides/kubernetes-intro.html[Deploying microservices to Kubernetes^]
 guide.
+
+// File 2
+kubernetes.yaml
+[source, yaml, linenums, indent=0, role="code_column"]
+----
+include::finish/kubernetes.yaml[]
+----
