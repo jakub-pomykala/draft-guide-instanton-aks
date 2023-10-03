@@ -652,7 +652,7 @@ Replace [hotspot=sysImage hotspot=invImage file=0]`[registry-server]` with your 
 You can get the login server for your registry by running the `az acr show -n [registry-name] --query loginServer` command.
 
 kubernetes.yaml
-[source, yaml, linenums, indent=0, hide_tags=createKNativeSys,createKNativeInv, role="code_column"]
+[source, yaml, linenums, indent=0, hide_tags=createKNativeSys, role="code_column"]
 ----
 include::finish/kubernetes.yaml[]
 ----
