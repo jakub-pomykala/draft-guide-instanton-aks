@@ -21,6 +21,10 @@
 :page-seo-title: Faster startup and better CPU and memory use in containers on Azure
 :page-seo-description: A getting started tutorial with examples on how to containerize a Java microservice with Open Liberty InstantOn feature to accelerate the startup time. To improve the CPU and memory usage, deploy your application by enabling Semeru Cloud Compiler (SCC) in your deploying to Azure Kubernetes Services (AKS) on Microsoft Azure. by using Azure Container Registry as a private container registry.
 :guide-author: Open Liberty
+
+:system-api: http://[system-EXTERNAL-IP]:9080/system/properties
+:inventory-api: http://[inventory-EXTERNAL-IP]:9081/inventory/systems
+
 = Faster startup and better CPU and memory use in containers on Azure
 
 [.hidden]
