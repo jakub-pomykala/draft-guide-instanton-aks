@@ -931,3 +931,45 @@ The default properties that are defined in the [hotspot file=0]`pom.xml` file ar
 | [hotspot=sysHttpPort file=0]`sys.http.port`    | The HTTP port for the {kube} Service `system-service`, 9080 by default.
 | [hotspot=invHttpPort file=0]`inv.http.port`    | The HTTP port of the {kube} Service `inventory-service`, 9081 by default.
 |===
+
+=== Running the tests
+
+Run the Maven `failsafe:integration-test` goal to test your microservices by replacing `[system-EXTERNAL-IP]` and `[inventory-EXTERNAL-IP]`
+with the values that were determined in the previous section.
+
+[role='command']
+```
+mvn failsafe:integration-test -Dsystem.ip=[system-EXTERNAL-IP] -Dinventory.ip=[inventory-EXTERNAL-IP]
+```
+
+If the tests pass, you will see an output similar to the following for each service:
+
+[role="no_copy"]
+----
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running it.io.openliberty.guides.system.SystemEndpointIT
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.673 sec - in it.io.openliberty.guides.system.SystemEndpointIT
+
+Results:
+
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+----
+
+[role="no_copy"]
+----
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running it.io.openliberty.guides.inventory.InventoryEndpointIT
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.222 sec - in it.io.openliberty.guides.inventory.InventoryEndpointIT
+
+Results:
+
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+----
+
+// =================================================================================================
+// Tearing down the environment
+// =================================================================================================
