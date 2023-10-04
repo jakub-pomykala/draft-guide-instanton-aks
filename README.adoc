@@ -793,9 +793,10 @@ Semeru Cloud Comiler server instance provides real-time code compiling as a proc
 
 By setting the [hotspot=enable file=0]`enable` parameter to `true` the [hotspot=semeruCloudCompilerSys file=0]`semeruCloudCompiler` configuration is granted the application access to the Semeru Cloud Compiler server instance.
 
-To configure the Semeru Cloud Compiler to handle Just-In-time (JIT) compilation requests from the application you have to set it's [hotspot=enable file=0]`enable` parameter to `true` and also specify the amount of replices you would like.
 You are not required to specify the amount of replices as the default is `1`. Another parameter that you can specify is the `resource`; this is the resource requests and limits for the Semeru Cloud Compiler. The CPU deafults to `100m` with a limit of `2000m`.
 The memory defaults to `800Mi`, with a limit of `1200Mi`. To find out more you can visit link:https://github.com/OpenLiberty/open-liberty-operator/blob/main/doc/user-guide-v1.adoc[Open Liberty Operator v1.2.0+ documentation].
+
+To configure the Semeru Cloud Compiler to handle Just-In-time (JIT) compilation requests from the application you have to set it's [hotspot=enable file=0]`enable` parameter to `true` and also specify the amount of replices you would like.
 
 [role="code_command hotspot file=0", subs="quotes"]
 ----
@@ -861,7 +862,7 @@ knative-serving   webhook-8466d59795-5kjsk                  1/1     Running     
 // =================================================================================================
 === Enabling KNative Serving
 
-To enable KNative serving add in the [hotspot=createKNativeSys hotspot=createKNativeInv file=0]`CreateKnativeService` to both the `system` and `inventory` service.
+To enable KNative serving add in the [hotspot=createKNativeSys hotspot=createKNativeInv file=0]`CreateKnativeService` to both the `system` and `inventory` service and setting it to `enable`.
 
 [role="code_command hotspot file=0", subs="quotes"]
 ----
