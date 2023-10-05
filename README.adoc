@@ -24,6 +24,8 @@
 
 :system-api: http://[system-EXTERNAL-IP]:9080/system/properties
 :inventory-api: http://[inventory-EXTERNAL-IP]:9081/inventory/systems
+:system-knative: [system-URL]/inventory/systems
+:inventory-knative: [inventory-URL]/system/properties
 :kube: Kubernetes
 
 = Faster startup and better CPU and memory use in containers on Azure
@@ -45,18 +47,18 @@ InstantOn, a new feature within Open Liberty, enables you to take full advantage
 
 By using Semeru Cloud Compiler you'll be able to do just-in-time code compiling as a process independent of the applications virtual machine. Its benefits include CPU and memory utilization optimization in the application VM and improved resiliency.
 
-You will learn how to containize a microservice with Open Liberty InstantOn and deploy the container with Semeru Cloud Compiler enablement to a Kubernetes cluster on Azure Kubernetes Servivces (AKS).
+You will learn how to containerize a microservice with Open Liberty InstantOn and deploy the container with Semeru Cloud Compiler enablement to a Kubernetes cluster on Azure Kubernetes Servivces (AKS).
 
 https://openliberty.io/docs/latest/instanton.html[Open Liberty InstantOn^] provides fast startup times for MicroProfile and Jakarta EE applications. Your applications can start in milliseconds, without compromising on throughput, memory, development-production parity, or Java language features.
-
-Semeru Cloud Compiler uses the https://eclipse.dev/openj9/docs/jitserver[JITServer^] (Just-in-Time Server) technology that is included in the https://www.eclipse.org/openj9/[Eclipse OpenJ9 JVM^]. It decouples the JIT compiler from the JVM to prevent your Java application from suffering possible negative effects due to CPU and memory consumption caused by JIT compilation in the JVM.
-
-image::JIT_diagram.png[JIT_Diagram,align="center"]
 
 Microsoft Azure offers a managed Kubernetes service called Azure Kubernetes Services (AKS). AKS simplifies the process of running Kubernetes on Azure without needing to install or maintain your Kubernetes control plane. It provides a hosted kubernetes cluster where you can deploy your microservices. You will use AKS with Azure Container Registry. Azure Container Registry is a private registry that is used to store and distribute your container images. Note, Azure Container Registry is a paid service but there is a option for a free trial which you can setup by visting https://azure.microsoft.com/en-gb/free[Try Azure for free^] and following the instructions. 
 
 
-The microservice you will deploy is called `system`. The `system` microservice returns the JVM system properties of the running container. It also returns the pod’s name in the HTTP header, making replicas easy to distinguish from each other.
+The two microservices you will deploy are called `system` and `inventory`. 
+The `system` microservice returns the JVM system properties of the running container. 
+It also returns the name of the pod in the HTTP header, making replicas easy to distinguish from each other. 
+The `inventory` microservice adds the properties from the `system` microservice to the inventory. 
+This demonstrates how communication can be established between pods inside a cluster.
 
 image::checkpoint_diagram.png[Deployment,align="center"]
 
@@ -249,8 +251,6 @@ which is `[registry-name].azurecr.io`, with all lowercase letters.
 
 To push Podman images to your registry, you must log in to your Azure Container Registry by using the Azure CLI.
 
-To login to the registry with Podman instead of Podman there is a few more commands required.
-
 Firstly, login to the regsitry whilst exposing the token which you will set to the `TOKEN` variable
 
 [role=command]
@@ -284,6 +284,8 @@ This configuration performs the application process checkpoint and stores the pr
 This phase has the potential to provide the fastest startup time when restoring the application instance. The checkpoint happens after all configured applications are reported as started.
 This phase happens before opening any ports for listening to incoming requests for the applications. For more information about the checkpoint options, see the link:https://openliberty.io/docs/latest/instanton.html#beforeAppStart[Faster startup with InstantOn^]
 
+image::instanton.png[Deployment,align="center"]
+
 Navigate to the `start` directory. Run the following command to build and package the `system` microservice to a war file:
 
 [role=command]
@@ -306,6 +308,7 @@ system/Containerfile
 include::finish/system/Containerfile[]
 ----
 
+
 [role="code_command hotspot file=1",subs="quotes"]
 ----
 #Create the `inventory/Containerfile`.#
@@ -319,11 +322,11 @@ inventory/Containerfile
 include::finish/inventory/Containerfile[]
 ----
 
-Starting from the [hotspot=kernel-slim file=0]`kernel-slim-java17-openj9-ubi` Liberty container image, build the container image by copying the local [hotspot=config file=0]`config` directory to the container `config` directory, running the [hotspot=features file=0]`features.sh` script to add the Liberty features that your microservice is required to operate, copying your microservice [hotspot=war file=0]`war` file, and running the [hotspot=configure file=0]`configure.sh` script to get a pre-warmed container image.
+Starting from the [hotspot=kernel-slim file=1]`kernel-slim-java17-openj9-ubi` Liberty container image, build the container image by copying the local [hotspot=config file=1]`config` directory to the container `config` directory, running the [hotspot=features file=1]`features.sh` script to add the Liberty features that your microservice is required to operate, copying your microservice [hotspot=war file=1]`war` file, and running the [hotspot=configure file=1]`configure.sh` script to get a pre-warmed container image.
 
-Finally, run the [hotspot=checkpoint file=0]`checkpoint.sh` script to make a checkpoint. The execution of the `checkpoint.sh` must be the last instruction during your container image build. This configuration performs the application process checkpoint and stores the process data as the last layer of the application container image. In this guide, use the `afterAppStart` checkpoint option. For more information about the checkpoint options, see the https://openliberty.io/docs/latest/instanton.html#beforeAppStart[Faster startup with InstantOn^] documentation.
+Finally, run the [hotspot=checkpoint file=1]`checkpoint.sh` script to make a checkpoint. The execution of the [hotspot=checkpoint file=1]`checkpoint.sh` must be the last instruction during your container image build. This configuration performs the application process checkpoint and stores the process data as the last layer of the application container image. In this guide, use the `afterAppStart` checkpoint option. For more information about the checkpoint options, see the https://openliberty.io/docs/latest/instanton.html#beforeAppStart[Faster startup with InstantOn^] documentation.
 
-Use the following command to build the system InstantOn container image. To grant the necessary Linux capabilities to the container image build, this command must be run either as the `root` user or by using the `sudo` utility.
+Use the following command to build the `system` InstantOn container image. To grant the necessary Linux capabilities to the container image build, this command must be run either as the `root` user or by using the `sudo` utility.
 
 [role=command]
 ----
@@ -336,7 +339,7 @@ podman build \
    system/.
 ----
 
-Next use the following command to build the inventory InstantOn container image.
+Next use the following command to build the `inventory` InstantOn container image.
 
 [role=command]
 ----
@@ -349,7 +352,7 @@ podman build \
    inventory/.
 ----
 
-The three `--cap-add` options grant the three Linux capabilities that CRIU requires to perform the application process checkpoint during the container image build. The `--security-opt` option grants access to all Linux system calls to the container image build.
+The three `--cap-add` options grant the three Linux capabilities that https://criu.org/Main_Page[CRIU](Checkpoint Restore In Userspace) requires to perform the application process checkpoint during the container image build. The `--security-opt` option grants access to all Linux system calls to the container image build.
 
 
 For more information to build the InstantOn image by Podman, see the https://openliberty.io/docs/latest/instanton.html#three_step_process[Building the InstantOn image by using the three-step process with Docker or Podman^] documentation.
@@ -682,7 +685,7 @@ The [hotspot file=0]`kubernetes.yaml` file is configured to deploy two of resour
 
 The [hotspot=sysImage file=0]`applicationImage` for the `system` service and the [hotspot=sysImage file=0]`applicationImage` for the `inventory` service parameter defines what container image is deployed as part of the `OpenLibertyApplication` CRD.
 
-In [hotspot=securityContext file=0]`securityContext` configuration, the [hotspot=runAsNonRoot file=0]`runAsNonRoot` cofiguration specifies that for any configuration in the pod, all processes run with a non-root user ID. With the [hotspot=capabilities file=0]`capabailities` configuration, we are only adding the the  `CHECKPOINT_RESTORE` and `SETCAP` capabilities for our InstantOn image and dropping all the remaining capabilities by specifying [hotspot=ALL file=0]`ALL` in the `capabilities.drop`. 
+In [hotspot=securityContextSys hotspot=securityContextInv file=0]`securityContext` configuration, the [hotspot=runAsNonRoot file=0]`runAsNonRoot` cofiguration specifies that for any configuration in the pod, all processes run with a non-root user ID. With the [hotspot=capabilities file=0]`capabailities` configuration, we are only adding the the  `CHECKPOINT_RESTORE` and `SETCAP` capabilities for our InstantOn image and dropping all the remaining capabilities by specifying [hotspot=ALL file=0]`ALL` in the `capabilities.drop`. 
 
 Run the following command to deploy the `system` and `inventory` InstantOn images to your AKS:
 [role=command]
@@ -791,12 +794,16 @@ you see a new entry for `[system-EXTERNAL-IP]`.
 
 Semeru Cloud Comiler server instance provides real-time code compiling as a process, independent of the application.
 
-By setting the [hotspot=enable file=0]`enable` parameter to `true` the [hotspot=semeruCloudCompilerSys file=0]`semeruCloudCompiler` configuration is granted the application access to the Semeru Cloud Compiler server instance.
+Semeru Cloud Compiler uses the https://eclipse.dev/openj9/docs/jitserver[JITServer^] (Just-in-Time Server) technology that is included in the https://www.eclipse.org/openj9/[Eclipse OpenJ9 JVM^]. It decouples the JIT compiler from the JVM to prevent your Java application from suffering possible negative effects due to CPU and memory consumption caused by JIT compilation in the JVM.
+
+image::JIT_diagram.png[JIT_Diagram,align="center"]
+
+
 
 You are not required to specify the amount of replices as the default is `1`. Another parameter that you can specify is the `resource`; this is the resource requests and limits for the Semeru Cloud Compiler. The CPU deafults to `100m` with a limit of `2000m`.
 The memory defaults to `800Mi`, with a limit of `1200Mi`. To find out more you can visit link:https://github.com/OpenLiberty/open-liberty-operator/blob/main/doc/user-guide-v1.adoc[Open Liberty Operator v1.2.0+ documentation].
 
-To configure the Semeru Cloud Compiler to handle Just-In-time (JIT) compilation requests from the application you have to set it's [hotspot=enable file=0]`enable` parameter to `true` and also specify the amount of replices you would like.
+To configure the Semeru Cloud Compiler to handle Just-In-time (JIT) compilation requests from the application you have to set it's [hotspot=enable file=0]`enable` parameter to `true` and also specify the amount of replices you would like. Setting the [hotspot=enableSys hotspot=enableInv file=0]`enable` parameter to `true` the [hotspot=semeruCloudCompilerSys hotspot=semeruCloudCompilerInv file=0]`semeruCloudCompiler` configuration is granted the applications access to the Semeru Cloud Compiler server instance.
 
 [role="code_command hotspot file=0", subs="quotes"]
 ----
@@ -905,6 +912,12 @@ system      http://system.default.20.26.166.49.sslip.io      system-00001      s
 ----
 
 Because the have the `system` and  `inventory` still have [hotspot=exposeSystem hotspot=exposeInv file=0]`expose` parameter set to `true` you can now access these services using the URLs provided in the output above. 
+
+You can now access the microservices using the KNative endpoints but you also have to pass an env variable to the inventory service to accept port 80 as system.http.port instead of port 9080. This is because KNative deploys the system service on port 80 and now 9080.
+
+Point your browser to the `{inventory-knative}/[system-KNative-URL]` URL. When you visit this URL, these system
+properties are automatically stored in the inventory. Go back to `{inventory-knative}` and
+you see a new entry for `[system-KNative-URL]`.
 
 // =================================================================================================
 // Testing microservices that are running on Azure AKS

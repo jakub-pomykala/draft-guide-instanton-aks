@@ -42,13 +42,13 @@ spec:
       - SETPCAP
       drop:
       - ALL
-    # end::capabilities[]
+    # end::capabilitiesSys[]
   # end::securityContextSys[]
   # tag::semeruCloudCompilerSys[]
   semeruCloudCompiler:
-    # tag::enable[]
+    # tag::enableSys[]
     enable: true
-    # end::enable[]
+    # end::enableSys[]
     replicas: 3
   # end::semeruCloudCompilerSys[]
 # end::system[]
@@ -99,7 +99,9 @@ spec:
   # end::securityContextInv[]
   # tag::semeruCloudCompilerInv[]
   semeruCloudCompiler:
+    # tag::enableInv[]
     enable: true
+    # end::enableInv[]
     replicas: 3
   # end::semeruCloudCompilerInv[]
   # tag::env[]
