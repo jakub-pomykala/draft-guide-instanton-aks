@@ -43,24 +43,25 @@ Explore how to accelerate the startup of your containers by using Open Liberty I
 
 == What you'll learn
 
+https://openliberty.io/docs/latest/instanton.html[Open Liberty InstantOn^] provides fast startup times for MicroProfile and Jakarta EE applications. Your applications can start in milliseconds, without compromising on throughput, memory, development-production parity, or Java language features. By using Semeru Cloud Compiler you'll be able to do just-in-time code compiling as a process independent of the applications virtual machine. Its benefits include CPU and memory utilization optimization in the application VM and improved resiliency.
+
 InstantOn, a new feature within Open Liberty, enables you to take full advantage of cloud infrastructure with fast and dynamic start-up—without inheriting compromises commonly found when compiling your code to native images. InstantOn will allow you to easily adopt serverless practices while enabling you to respond faster to ever-changing workload demands, improve sustainability and reduce costs by dynamically adjusting infrastructure to demand and facilitate innovation through modern application architectures and serverless. 
 
-By using Semeru Cloud Compiler you'll be able to do just-in-time code compiling as a process independent of the applications virtual machine. Its benefits include CPU and memory utilization optimization in the application VM and improved resiliency.
+image::instanton.png[InstantOn_process,align="center"]
 
-You will learn how to containerize a microservice with Open Liberty InstantOn and deploy the container with Semeru Cloud Compiler enablement to a Kubernetes cluster on Azure Kubernetes Servivces (AKS).
+Semeru Cloud Compiler uses the https://eclipse.dev/openj9/docs/jitserver[JITServer^] (Just-in-Time Server) technology that is included in the https://www.eclipse.org/openj9/[Eclipse OpenJ9 JVM^]. It decouples the JIT compiler from the JVM to prevent your Java application from suffering possible negative effects due to CPU and memory consumption caused by JIT compilation in the JVM.
 
-https://openliberty.io/docs/latest/instanton.html[Open Liberty InstantOn^] provides fast startup times for MicroProfile and Jakarta EE applications. Your applications can start in milliseconds, without compromising on throughput, memory, development-production parity, or Java language features.
+image::JIT_diagram.png[JIT_Diagram,align="center"]
 
 Microsoft Azure offers a managed Kubernetes service called Azure Kubernetes Services (AKS). AKS simplifies the process of running Kubernetes on Azure without needing to install or maintain your Kubernetes control plane. It provides a hosted kubernetes cluster where you can deploy your microservices. You will use AKS with Azure Container Registry. Azure Container Registry is a private registry that is used to store and distribute your container images. Note, Azure Container Registry is a paid service but there is a option for a free trial which you can setup by visting https://azure.microsoft.com/en-gb/free[Try Azure for free^] and following the instructions. 
 
+You will learn how to containerize a microservice with Open Liberty InstantOn and deploy the container with Semeru Cloud Compiler enablement to a Kubernetes cluster on Azure Kubernetes Servivces (AKS).
 
 The two microservices you will deploy are called `system` and `inventory`. 
 The `system` microservice returns the JVM system properties of the running container. 
 It also returns the name of the pod in the HTTP header, making replicas easy to distinguish from each other. 
 The `inventory` microservice adds the properties from the `system` microservice to the inventory. 
 This demonstrates how communication can be established between pods inside a cluster.
-
-image::checkpoint_diagram.png[Deployment,align="center"]
 
 // =================================================================================================
 // Prerequisites
@@ -283,8 +284,6 @@ To speed up your container startup time, build your container image with the Ope
 This configuration performs the application process checkpoint and stores the process data as the last layer of the application container image. In this guide, use the `afterAppStart` checkpoint option.
 This phase has the potential to provide the fastest startup time when restoring the application instance. The checkpoint happens after all configured applications are reported as started.
 This phase happens before opening any ports for listening to incoming requests for the applications. For more information about the checkpoint options, see the link:https://openliberty.io/docs/latest/instanton.html#beforeAppStart[Faster startup with InstantOn^]
-
-image::instanton.png[Deployment,align="center"]
 
 Navigate to the `start` directory. Run the following command to build and package the `system` microservice to a war file:
 
@@ -793,12 +792,6 @@ you see a new entry for `[system-EXTERNAL-IP]`.
 === Enabling Semeru Cloud Compiler
 
 Semeru Cloud Comiler server instance provides real-time code compiling as a process, independent of the application.
-
-Semeru Cloud Compiler uses the https://eclipse.dev/openj9/docs/jitserver[JITServer^] (Just-in-Time Server) technology that is included in the https://www.eclipse.org/openj9/[Eclipse OpenJ9 JVM^]. It decouples the JIT compiler from the JVM to prevent your Java application from suffering possible negative effects due to CPU and memory consumption caused by JIT compilation in the JVM.
-
-image::JIT_diagram.png[JIT_Diagram,align="center"]
-
-
 
 You are not required to specify the amount of replices as the default is `1`. Another parameter that you can specify is the `resource`; this is the resource requests and limits for the Semeru Cloud Compiler. The CPU deafults to `100m` with a limit of `2000m`.
 The memory defaults to `800Mi`, with a limit of `1200Mi`. To find out more you can visit link:https://github.com/OpenLiberty/open-liberty-operator/blob/main/doc/user-guide-v1.adoc[Open Liberty Operator v1.2.0+ documentation].
