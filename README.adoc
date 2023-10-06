@@ -47,7 +47,7 @@ https://openliberty.io/docs/latest/instanton.html[Open Liberty InstantOn^] provi
 
 InstantOn, a new feature within Open Liberty, enables you to take full advantage of cloud infrastructure with fast and dynamic start-up—without inheriting compromises commonly found when compiling your code to native images. InstantOn will allow you to easily adopt serverless practices while enabling you to respond faster to ever-changing workload demands, improve sustainability and reduce costs by dynamically adjusting infrastructure to demand and facilitate innovation through modern application architectures and serverless. 
 
-image::instanton.png[InstantOn_process,align="center"]
+image::checkpoint_diagram.png[checkpoint_diagram,align="center"]
 
 Semeru Cloud Compiler uses the https://eclipse.dev/openj9/docs/jitserver[JITServer^] (Just-in-Time Server) technology that is included in the https://www.eclipse.org/openj9/[Eclipse OpenJ9 JVM^]. It decouples the JIT compiler from the JVM to prevent your Java application from suffering possible negative effects due to CPU and memory consumption caused by JIT compilation in the JVM.
 
@@ -284,6 +284,8 @@ To speed up your container startup time, build your container image with the Ope
 This configuration performs the application process checkpoint and stores the process data as the last layer of the application container image. In this guide, use the `afterAppStart` checkpoint option.
 This phase has the potential to provide the fastest startup time when restoring the application instance. The checkpoint happens after all configured applications are reported as started.
 This phase happens before opening any ports for listening to incoming requests for the applications. For more information about the checkpoint options, see the link:https://openliberty.io/docs/latest/instanton.html#beforeAppStart[Faster startup with InstantOn^]
+
+image::build_process_diagram.png[build_process_diagram,align="center"]
 
 Navigate to the `start` directory. Run the following command to build and package the `system` microservice to a war file:
 
